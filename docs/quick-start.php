@@ -33,7 +33,7 @@
 
 <h2>Tests</h2>
 
-<p>For the test-infected, the <a href="http://phemto.cvs.sourceforge.net/phemto/phemto/tests/">phemto test suite</a> documents behaviour in detail.</p>
+<p>For the test-infected, the <a href="http://phemto.svn.sourceforge.net/viewvc/phemto/trunk/tests/">phemto test suite</a> documents behaviour in detail.</p>
 
 <h2>Quick Start</h2>
 
