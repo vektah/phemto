@@ -123,7 +123,9 @@ highlight_string($code);
 ?>
 </div>
 
-<p>If you want an object to have a singleton lifecycle:</p>
+<h3>Lifecycle</h3>
+
+<p>For a singleton lifecycle:</p>
 
 <div class="code">
 <?php
@@ -136,9 +138,12 @@ highlight_string($code);
 ?>
 </div>
 
+<p>Any object can be singleton-ised. No changes are required to your own classes.</p>
+<p>Note that objects are singletons with respect to their parent phemto instance not the script as a whole. If you have two or more containers on the go, each having registered a singleton Foo, they both hold a single instance of Foo but a different Foo per container.</p>
+
 <h3>Client Code</h3>
 
-<p>In the application code, pull objects out of the container with an instantiate call. If you forgot to register a needed dependency an exception will be thrown here.</p>
+<p>In the application code, pull objects out of the container with an instantiate call. If you forget to register a needed dependency an exception will be thrown here.</p>
 
 <div class="code">
 <?php

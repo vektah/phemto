@@ -131,6 +131,6 @@ th {
 #leftnav div, #rightnav div { 
 	margin: 1em 1em 2em 2em; 
 }
-#content h2 { 
+#content h2,h3 { 
 	margin: 2em 0 1.5em 0; 
 }
