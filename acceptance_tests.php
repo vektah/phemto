@@ -44,19 +44,19 @@ interface Hinted { }
 
 class HintedConstructor implements Hinted {
 	function __construct(InterfaceWithOneImplementation $one) {
-		$this->args = func_get_args();
+		$this->one = $one;
 	}
 }
 
 class HintedConstructorWithDependencyChoice implements Hinted {
 	function __construct(InterfaceWithManyImplementations $alternate) {
-		$this->args = func_get_args();
+		$this->altternate = $alternate;
 	}
 }
 
 class RepeatedHintConstructor {
 	function __construct(InterfaceWithManyImplementations $first, InterfaceWithManyImplementations $second) {
-		$this->args = func_get_args();
+		$this->args = array($first, $second);
 	}
 }
 
@@ -129,7 +129,36 @@ class CanInstantiateFromSessions extends UnitTestCase {
 	}
 }
 
-class CanCallSettersToCompleteInitialisation extends UnitTestCase {
+class NeedsInitToCompleteConstruction {
+	function init(LoneClass $lone) {
+		$this->lone = $lone;
+	}
+}
+
+class CanUseSetterInjection extends UnitTestCase {
+	function testCanCallSettersToCompleteInitialisation() {
+		$injector = new Phemto();
+		$injector->whenCreating('NeedsInitToCompleteConstruction')->call('init');
+		$expected = new NeedsInitToCompleteConstruction();
+		$expected->init(new LoneClass());
+		$this->assertIdentical($injector->instantiate('NeedsInitToCompleteConstruction'),
+							   $expected);
+	}
+}
+
+interface Bare { }
+class BareImplementation implements Bare { }
+class WrapperForBare {
+	function __construct(Bare $bare) { $this->bare = $bare; }
+}
+
+class MustBeCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
+	function testCanWrapWithDecorator() {
+		$injector = new Phemto();
+		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
+		$this->assertIdentical($injector->instantiate('Bare'),
+							   new WrapperForBare(new BareImplementation()));
+	}
 }
 
 class WorksWithNamespaces extends UnitTestCase {
