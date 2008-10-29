@@ -123,8 +123,6 @@ highlight_string($code);
 ?>
 </div>
 
-<h3>Lifecycle</h3>
-
 <p>For a singleton lifecycle:</p>
 
 <div class="code">
