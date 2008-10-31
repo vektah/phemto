@@ -1,5 +1,7 @@
 <?php
 require_once('simpletest/autorun.php');
+require_once('phemto/phemto.php');
+
 
 class LoneClass { }
 interface InterfaceWithOneImplementation { }
@@ -9,18 +11,22 @@ class FirstImplementation implements InterfaceWithManyImplementations { }
 class SecondImplementation implements InterfaceWithManyImplementations { }
 
 class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
-	function testNamedClassInstantiatedAutomatically() {
-		$injector = new Phemto();
-		$this->assertIsA($injector->instantiate('LoneClass'), 'LoneClass');
-	}
 	
-	function testInterfaceWithOnlyOneCandidateIsInstantiatedAutomatically() {
+    function testNamedClassInstantiatedAutomatically() {
 		$injector = new Phemto();
-		$this->assertIsA($injector->instantiate('InterfaceWithOneImplementation'),
-						 'OnlyImplementation');
+		$this->assertIsA(
+            $injector->instantiate('LoneClass'), 
+            'LoneClass');
 	}
-	
-	function testWillThrowForUnknownClass() {
+
+    function testInterfaceWithOnlyOneCandidateIsInstantiatedAutomatically() {
+		$injector = new Phemto();
+		$this->assertIsA(
+            $injector->instantiate('InterfaceWithOneImplementation'),
+            'OnlyImplementation');
+	}
+
+    function testWillThrowForUnknownClass() {
 		$injector = new Phemto();
 		$this->expectException(new CannotFindImplementation('NonExistent'));
 		$injector->instantiate('NonExistent');
@@ -28,18 +34,23 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 	
 	function testWillThrowIfInterfaceUnspecified() {
 		$injector = new Phemto();
-		$this->expectException(new MultipleImplementationsPossible('InterfaceWithManyImplementations'));
+		$this->expectException(
+            new MultipleImplementationsPossible(
+                'InterfaceWithManyImplementations', 
+                array('FirstImplementation', 'SecondImplementation')));
 		$injector->instantiate('InterfaceWithManyImplementations');
 	}
 	
-	function testCanBeConfiguredToPreferSpecificImplementation() {
+	/*
+    function testCanBeConfiguredToPreferSpecificImplementation() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
 		$this->assertIsA($injector->instantiate('InterfaceWithManyImplementations'),
 						 'SecondImplementation');
 	}
+    */
 }
-
+/*
 interface Hinted { }
 
 class HintedConstructor implements Hinted {
@@ -87,6 +98,22 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 	}
 }
 
+abstract class Car {
+
+    function __construct(Steering $steering) {
+        $this->steering = $steering;
+    }
+    function getSteering() {
+        return get_class($this->steering);
+    }
+}
+class Jaguar extends Car {}
+class MiniCooper extends Car {}
+
+interface Steering {}
+class RightHandDrive implements Steering {}
+class LeftHandDrive implements Steering {}
+
 class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
 		$injector = new Phemto();
@@ -96,6 +123,25 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 				$injector->instantiate('HintedConstructorWithDependencyChoice'),
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
 	}
+    function testCanSetDifferentPreferencesForInstancesOfTheSameClass() {
+		$globe = new Phemto();
+        $britain = $globe->getSubgraph();
+        $america = $globe->getSubgraph();
+
+        $globe->register('Jaguar');
+        $america->register('LeftHandDrive');
+        $britain->register('RightHandDrive');
+        
+        $car = $america->instantiate('Car');
+        $this->assertEqual(
+            $car->getSteering(), 
+            'LeftHandDrive');
+
+        $car = $britain->instantiate('Car');
+        $this->assertEqual(
+            $car->getSteering(), 
+            'RightHandDrive');
+    }
 }
 
 class CanInstantiateObjectsAsSingletons extends UnitTestCase {
@@ -166,4 +212,5 @@ class WorksWithNamespaces extends UnitTestCase {
 
 class AsMuchAsPossibleWorksWithAutoload extends UnitTestCase {
 }
+*/
 ?>

@@ -1,6 +1,25 @@
 <?php
 require_once(dirname(__FILE__) . '/locator.php');
 
+class CannotFindImplementation extends Exception {
+    function __construct($interface) {
+        $this->message = "No class registered for interface $interface";
+    }
+}
+
+class MultipleImplementationsPossible extends Exception {
+
+    var $message = 'Found [%d] candidates [%s] for requested [%s]. You must configure Phemto to use one of the candidates.';
+
+    function __construct($interface, $candidates) {
+        $this->message = sprintf(
+            $this->message, 
+            count($candidates), 
+            implode(',', $candidates), 
+            $interface);
+    }
+}
+
 class Phemto {
     protected $registry = array();
 
@@ -20,8 +39,11 @@ class Phemto {
     }
 
     function instantiate($interface, $parameters = array()) {
+        if( !array_key_exists($interface, $this->registry)) {
+            $this->_registerUnknown($interface);
+        }
         if (! isset($this->registry[$interface])) {
-            throw new Exception("No class registered for interface $interface");
+            throw new CannotFindImplementation($interface);
         }
         $locator = $this->registry[$interface];
         $dependencies = $this->instantiateDependencies(
@@ -30,6 +52,33 @@ class Phemto {
         return $locator->instantiate($dependencies);
     }
 
+    protected function _registerUnknown($interface) {
+        if(in_array($interface, get_declared_classes())) {
+            $this->register($interface);
+            return;
+        }
+        if( !in_array($interface, get_declared_interfaces())) {
+            return;
+        }
+        $classes = $this->_getImplementationsOf($interface);
+        if(1 == count($classes)) {
+            $this->register(array_shift($classes));
+            return;
+        } else {
+            throw(new MultipleImplementationsPossible($interface, $classes));
+        }
+    }
+
+    protected function _getImplementationsOf($interface) {
+        $implementations = array();
+        foreach(get_declared_classes() as $class) {
+            if(in_array($interface, class_implements($class))) {
+                $implementations[] = $class;
+            }
+        }
+        return $implementations;
+    }
+    
     protected function instantiateDependencies($reflection, $supplied) {
     	$dependencies = array();
         if ($constructor = $reflection->getConstructor()) {
