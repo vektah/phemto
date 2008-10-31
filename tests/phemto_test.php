@@ -21,39 +21,39 @@ class WhenInstantiatingWithoutDependencies extends UnitTestCase {
 
     function testCanInstantiateSimpleClassWithoutDependencies() {
         $injector = new Phemto();
-        $injector->register('One');
+        $injector->willUse('One');
         $this->assertIsA($injector->instantiate('One'), 'One');
     }
 
     function testCanInstantiateClassFromInterfaceWithoutDependencies() {
         $injector = new Phemto();
-        $injector->register('One');
+        $injector->willUse('One');
         $this->assertIsa($injector->instantiate('Number'), 'One');
     }
 
     function testCanInstantiateSubclassForSuperclass() {
         $injector = new Phemto();
-        $injector->register('Single');
+        $injector->willUse('Single');
         $this->assertIsA($injector->instantiate('One'), 'Single');
     }
 
     function testCanInstantiateSubclassTwoDeepFromSuperclass() {
         $injector = new Phemto();
-        $injector->register('Lonely');
+        $injector->willUse('Lonely');
         $this->assertIsA($injector->instantiate('One'), 'Lonely');
     }
 
     function testUsesLastRegisteredClassToFillDependency() {
         $injector = new Phemto();
-        $injector->register('One');
-        $injector->register('Two');
+        $injector->willUse('One');
+        $injector->willUse('Two');
         $this->assertIsA($injector->instantiate('Number'), 'Two');
     }
 
     function testMissingClassTriggersException() {
         $injector = new Phemto();
         try {
-            $injector->register('NoClassForThis');
+            $injector->willUse('NoClassForThis');
             $this->fail('Missing class did not throw');
         } catch (Exception $exception) {
         }
@@ -84,27 +84,27 @@ class WhenInstantiatingWithParameters extends UnitTestCase {
 
     function testCanFulfillSimpleConstructorDependency() {
         $injector = new Phemto();
-        $injector->register('Two');
-        $injector->register('Doubler');
+        $injector->willUse('Two');
+        $injector->willUse('Doubler');
         $result = $injector->instantiate('Doubler');
         $this->assertEqual($result->result, 4);
     }
 
     function testMultipleConstructorDependency() {
         $injector = new Phemto();
-        $injector->register('One');
-        $injector->register('Two');
-        $injector->register('Adder');
+        $injector->willUse('One');
+        $injector->willUse('Two');
+        $injector->willUse('Adder');
         $result = $injector->instantiate('Adder');
         $this->assertEqual($result->result, 3);
     }
 
     function testNestedConstructorDependency() {
         $injector = new Phemto();
-        $injector->register('One');
-        $injector->register('Two');
-        $injector->register('Adder');
-        $injector->register('Doubler');
+        $injector->willUse('One');
+        $injector->willUse('Two');
+        $injector->willUse('Adder');
+        $injector->willUse('Doubler');
         $result = $injector->instantiate('Doubler');
         $this->assertEqual($result->result, 6);
     }
@@ -136,30 +136,30 @@ class WhenFillingConstructorDependencies extends UnitTestCase {
 
 	function testCanInitialiseWithAStringParameter() {
         $injector = new Phemto();
-        $injector->register('Greeting');
+        $injector->willUse('Greeting');
 		$message = $injector->instantiate('Greeting', array('friend'));
 		$this->assertEqual($message->getMessage(), 'Hello friend');
 	}
 
 	function testCanInitialiseInterfaceWithStringParameter() {
         $injector = new Phemto();
-        $injector->register('Greeting');
+        $injector->willUse('Greeting');
 		$message = $injector->instantiate('Message', array('friend'));
 		$this->assertEqual($message->getMessage(), 'Hello friend');
 	}
 
 	function testCanMixIncomingParametersWithDependencies() {
         $injector = new Phemto();
-        $injector->register('Increaser');
-        $injector->register('One');
+        $injector->willUse('Increaser');
+        $injector->willUse('One');
 		$increaser = $injector->instantiate('Increaser', array(13));
 		$this->assertEqual($increaser->result, 14);
 	}
 
 	function testCanMixOptionalParametersWithInjection() {
         $injector = new Phemto();
-        $injector->register('Increaser');
-        $injector->register('Two');
+        $injector->willUse('Increaser');
+        $injector->willUse('Two');
 		$increaser = $injector->instantiate('Increaser', array(13, 10));
 		$this->assertEqual($increaser->result, 25);
 	}
@@ -169,7 +169,7 @@ class WhenManagingLifecycle extends UnitTestCase {
 
 	function testOnlyEverOneInstanceWhenRegisteredAsSingleton() {
         $injector = new Phemto();
-        $injector->register(new Singleton('One'));
+        $injector->willUse(new Singleton('One'));
         $this->assertIdentical(
         		$injector->instantiate('Number'),
         		$injector->instantiate('Number'));
@@ -177,7 +177,7 @@ class WhenManagingLifecycle extends UnitTestCase {
 
 	function testCopyInstantiatedWhenRegisteredAsMultiple() {
         $injector = new Phemto();
-        $injector->register('One');
+        $injector->willUse('One');
         $this->assertClone(
         		$injector->instantiate('Number'),
         		$injector->instantiate('Number'));
@@ -185,7 +185,7 @@ class WhenManagingLifecycle extends UnitTestCase {
 
 	function testCanInstantiateSingletonWithParameters() {
         $injector = new Phemto();
-        $injector->register(new Singleton('Greeting', array('me')));
+        $injector->willUse(new Singleton('Greeting', array('me')));
         $message = $injector->instantiate('Message');
         $this->assertEqual($message->getMessage(), 'Hello me');
 	}
@@ -203,7 +203,7 @@ class WhenApplyingLocationDecorators extends UnitTestCase {
 	
 	function testCanAffectConstructionOnTheWayThrough() {
 		$injector = new Phemto();
-		$injector->register(new MessageToYou('Greeting'));
+		$injector->willUse(new MessageToYou('Greeting'));
         $message = $injector->instantiate('Message', array('me'));
         $this->assertEqual($message->getMessage(), 'Hello you');
 	}
@@ -221,27 +221,27 @@ class WhenPassingParameters extends UnitTestCase {
         $this->injector = new Phemto;
     }
     function testCanPassAnEmptyString() {
-        $this->injector->register('Charm');
+        $this->injector->willUse('Charm');
         $this->injector->instantiate('Charm', array(''));
         #$this->assertNoErrors();
     }
     function testCanPassBooleanFalse() {
-        $this->injector->register('Charm');
+        $this->injector->willUse('Charm');
         $this->injector->instantiate('Charm', array(false));
         #$this->assertNoErrors();
     }
     function testCanPassIntegerZero() {
-        $this->injector->register('Charm');
+        $this->injector->willUse('Charm');
         $this->injector->instantiate('Charm', array(0));
         #$this->assertNoErrors();
     }
     function testCanPassEmptyArray() {
-        $this->injector->register('Charm');
+        $this->injector->willUse('Charm');
         $this->injector->instantiate('Charm', array(array()));
         #$this->assertNoErrors();
     }
     function testCanPassNull() {
-        $this->injector->register('Charm');
+        $this->injector->willUse('Charm');
         $this->injector->instantiate('Charm', array(null)); 
         #$this->assertNoErrors();
     }
@@ -251,8 +251,8 @@ class WhenRegisteringClasses extends UnitTestCase {
     function testCanRegisterFluently() {
         $injector = new Phemto;
         $injector
-            ->register('Stdclass')
-            ->register('Stdclass');
+            ->willUse('Stdclass')
+            ->willUse('Stdclass');
         #$this->assertNoErrors();
     }
 }
@@ -277,8 +277,8 @@ class WhenPassingParametersToDependencies extends UnitTestCase {
     function __construct() {
         $this->injector = new Phemto;
         $this->injector
-            ->register('Bicycle')
-            ->register('Person');
+            ->willUse('Bicycle')
+            ->willUse('Person');
     }
     function testCanPassParametersToADependencyWhenInstantiatingTheClient() {
         $bike = $this->injector

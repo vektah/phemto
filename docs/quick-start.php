@@ -96,8 +96,8 @@ highlight_string($code);
 <?php
 $code = '<?php    
 
-$phemto->register(\'Foo\');
-$phemto->register(\'Charm\');
+$phemto->willUse(\'Foo\');
+$phemto->willUse(\'Charm\');
 
 ';
 highlight_string($code);
@@ -111,8 +111,8 @@ highlight_string($code);
 $code = '<?php    
 
 $phemto
-    ->register(\'Foo\')
-    ->register(\'Charm\')
+    ->willUse(\'Foo\')
+    ->willUse(\'Charm\')
     ...
     ...
     ...
@@ -129,7 +129,7 @@ highlight_string($code);
 <?php
 $code = '<?php    
 
-$phemto->register(new Singleton(\'Charm\'));
+$phemto->willUse(new Singleton(\'Charm\'));
 
 ';
 highlight_string($code);
@@ -158,7 +158,7 @@ highlight_string($code);
 
 <p>Note how easy it is to tweak the application behaviour simply by registering a different class: Quark, Strangeness or Charm. This is why you'd set things up to use an injector. </p>
 
-<p>A secondary benefit is that there is less work to do in wiring up the object graph. It's all done automatically by the container. All you have to do is make a few register() calls and include the classes.</p>
+<p>A secondary benefit is that there is less work to do in wiring up the object graph. It's all done automatically by the container. All you have to do is make a few willUse() calls and include the classes.</p>
 
 <h3>Scalar Parameters</h3>
 
@@ -179,7 +179,7 @@ class Foo {
 }
 
 // singletons:
-$phemto->register(new Singleton(\'Foo\', array($a, $b)));
+$phemto->willUse(new Singleton(\'Foo\', array($a, $b)));
 
 // non-singletons:
 $phemto->instantiate(\'Foo\', array($a, $b));
@@ -217,8 +217,8 @@ highlight_string($code);
 <?php
 $code = '<?php    
 
-$phemto->register(\'Foo\');
-$phemto->register(new Singleton(\'Charm\', array($a, $b)));
+$phemto->willUse(\'Foo\');
+$phemto->willUse(new Singleton(\'Charm\', array($a, $b)));
 
 ';
 highlight_string($code);

@@ -128,9 +128,9 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
         $britain = $globe->getSubgraph();
         $america = $globe->getSubgraph();
 
-        $globe->register('Jaguar');
-        $america->register('LeftHandDrive');
-        $britain->register('RightHandDrive');
+        $globe->willUse('Jaguar');
+        $america->willUse('LeftHandDrive');
+        $britain->willUse('RightHandDrive');
         
         $car = $america->instantiate('Car');
         $this->assertEqual(

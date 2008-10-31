@@ -23,7 +23,7 @@ class MultipleImplementationsPossible extends Exception {
 class Phemto {
     protected $registry = array();
 
-    function register($service) {
+    function willUse($service) {
         if (! $service instanceof PhemtoLocator) {
             $service = new Locator($service);
         }
@@ -54,7 +54,7 @@ class Phemto {
 
     protected function _registerUnknown($interface) {
         if(in_array($interface, get_declared_classes())) {
-            $this->register($interface);
+            $this->willUse($interface);
             return;
         }
         if( !in_array($interface, get_declared_interfaces())) {
@@ -62,7 +62,7 @@ class Phemto {
         }
         $classes = $this->_getImplementationsOf($interface);
         if(1 == count($classes)) {
-            $this->register(array_shift($classes));
+            $this->willUse(array_shift($classes));
             return;
         } else {
             throw(new MultipleImplementationsPossible($interface, $classes));
