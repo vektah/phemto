@@ -87,7 +87,6 @@ class CanAutomaticallyInjectTypeHintedDependencies extends UnitTestCase {
                 new SecondImplementation()));
 	}
 }
-/*
 
 class CanInjectDependenciesByVariableName extends UnitTestCase {
 	function testExplicitlyNamedVariables() {
@@ -98,6 +97,11 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 				$injector->instantiate('RepeatedHintConstructor'),
 				new RepeatedHintConstructor(new FirstImplementation(), new SecondImplementation()));
 	}
+    
+    function testTypeHintsTakePrecedence() {
+        // or do they? specify one or the other
+    }
+
 }
 
 class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
@@ -110,10 +114,6 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
 	}
 }
-
-#
-# This next one, the car stuff, is just a suggestion.
-#
 
 abstract class Car {
 
@@ -152,6 +152,7 @@ class CanSetDifferentPreferencesForInstancesOfTheSameClass extends UnitTestCase 
             'RightHandDrive');
     }
 }
+
 class CanInstantiateObjectsAsSingletons extends UnitTestCase {
 	function testSameInstanceIsReusedForSingleton() {
 		$injector = new Phemto();
@@ -206,12 +207,17 @@ class WrapperForBare {
 	function __construct(Bare $bare) { $this->bare = $bare; }
 }
 
+class MustBeEasyToAppendToWiringFile extends UnitTestCase {
+    // "everything must be override-able"
+}
+
 class MustBeCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 	function testCanWrapWithDecorator() {
 		$injector = new Phemto();
 		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
-		$this->assertIdentical($injector->instantiate('Bare'),
-							   new WrapperForBare(new BareImplementation()));
+		$this->assertIdentical(
+            $injector->instantiate('Bare'),
+			new WrapperForBare(new BareImplementation()));
 	}
 }
 
@@ -220,5 +226,5 @@ class WorksWithNamespaces extends UnitTestCase {
 
 class AsMuchAsPossibleWorksWithAutoload extends UnitTestCase {
 }
-*/
+
 ?>
