@@ -41,16 +41,14 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 		$injector->instantiate('InterfaceWithManyImplementations');
 	}
 	
-	/*
     function testCanBeConfiguredToPreferSpecificImplementation() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
-		$this->assertIsA($injector->instantiate('InterfaceWithManyImplementations'),
-						 'SecondImplementation');
+		$this->assertIsA(
+            $injector->instantiate('InterfaceWithManyImplementations'),
+			'SecondImplementation');
 	}
-    */
 }
-/*
 interface Hinted { }
 
 class HintedConstructor implements Hinted {
@@ -74,18 +72,22 @@ class RepeatedHintConstructor {
 class CanAutomaticallyInjectTypeHintedDependencies extends UnitTestCase {
 	function testSimpleDependenciesAreFulfilledAutomatically() {
 		$injector = new Phemto();
-		$this->assertIdentical($injector->instantiate('HintedConstructor'),
-							   new HintedConstructor(new OnlyImplementation()));
+		$this->assertIdentical(
+            $injector->instantiate('HintedConstructor'),
+			new HintedConstructor(new OnlyImplementation()));
 	}
 	
 	function testRepeatedHintJustGetsTwoSeparateInstances() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
 		$this->assertEqual(
-				$injector->instantiate('RepeatedHintConstructor'),
-				new RepeatedHintConstructor(new SecondImplementation(), new SecondImplementation()));
+            $injector->instantiate('RepeatedHintConstructor'),
+            new RepeatedHintConstructor(
+                new SecondImplementation(), 
+                new SecondImplementation()));
 	}
 }
+/*
 
 class CanInjectDependenciesByVariableName extends UnitTestCase {
 	function testExplicitlyNamedVariables() {
@@ -97,6 +99,21 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 				new RepeatedHintConstructor(new FirstImplementation(), new SecondImplementation()));
 	}
 }
+
+class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
+	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
+		$injector = new Phemto();
+		$injector->willUse('FirstImplementation');
+		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
+		$this->assertEqual(
+				$injector->instantiate('HintedConstructorWithDependencyChoice'),
+				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
+	}
+}
+
+#
+# This next one, the car stuff, is just a suggestion.
+#
 
 abstract class Car {
 
@@ -114,16 +131,8 @@ interface Steering {}
 class RightHandDrive implements Steering {}
 class LeftHandDrive implements Steering {}
 
-class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
-	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
-		$injector = new Phemto();
-		$injector->willUse('FirstImplementation');
-		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
-		$this->assertEqual(
-				$injector->instantiate('HintedConstructorWithDependencyChoice'),
-				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
-	}
-    function testCanSetDifferentPreferencesForInstancesOfTheSameClass() {
+class CanSetDifferentPreferencesForInstancesOfTheSameClass extends UnitTestCase {
+    function test() {
 		$globe = new Phemto();
         $britain = $globe->getSubgraph();
         $america = $globe->getSubgraph();
@@ -143,7 +152,6 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
             'RightHandDrive');
     }
 }
-
 class CanInstantiateObjectsAsSingletons extends UnitTestCase {
 	function testSameInstanceIsReusedForSingleton() {
 		$injector = new Phemto();
