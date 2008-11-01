@@ -1,7 +1,6 @@
 <?php
 require_once('simpletest/autorun.php');
-require_once('phemto/phemto.php');
-
+require_once(dirname(__FILE__) . '/phemto.php');
 
 class LoneClass { }
 interface InterfaceWithOneImplementation { }
@@ -14,22 +13,19 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 	
     function testNamedClassInstantiatedAutomatically() {
 		$injector = new Phemto();
-		$this->assertIsA(
-            $injector->instantiate('LoneClass'), 
-            'LoneClass');
+		$this->assertIsA($injector->create('LoneClass'), 'LoneClass');
 	}
 
     function testInterfaceWithOnlyOneCandidateIsInstantiatedAutomatically() {
 		$injector = new Phemto();
-		$this->assertIsA(
-            $injector->instantiate('InterfaceWithOneImplementation'),
-            'OnlyImplementation');
+		$this->assertIsA($injector->create('InterfaceWithOneImplementation'),
+						 'OnlyImplementation');
 	}
 
     function testWillThrowForUnknownClass() {
 		$injector = new Phemto();
 		$this->expectException(new CannotFindImplementation('NonExistent'));
-		$injector->instantiate('NonExistent');
+		$injector->create('NonExistent');
 	}
 	
 	function testWillThrowIfInterfaceUnspecified() {
@@ -38,17 +34,17 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
             new MultipleImplementationsPossible(
                 'InterfaceWithManyImplementations', 
                 array('FirstImplementation', 'SecondImplementation')));
-		$injector->instantiate('InterfaceWithManyImplementations');
+		$injector->create('InterfaceWithManyImplementations');
 	}
 	
     function testCanBeConfiguredToPreferSpecificImplementation() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
-		$this->assertIsA(
-            $injector->instantiate('InterfaceWithManyImplementations'),
-			'SecondImplementation');
+		$this->assertIsA($injector->create('InterfaceWithManyImplementations'),
+						 'SecondImplementation');
 	}
 }
+
 interface Hinted { }
 
 class HintedConstructor implements Hinted {
@@ -72,19 +68,16 @@ class RepeatedHintConstructor {
 class CanAutomaticallyInjectTypeHintedDependencies extends UnitTestCase {
 	function testSimpleDependenciesAreFulfilledAutomatically() {
 		$injector = new Phemto();
-		$this->assertIdentical(
-            $injector->instantiate('HintedConstructor'),
-			new HintedConstructor(new OnlyImplementation()));
+		$this->assertIdentical($injector->create('HintedConstructor'),
+							   new HintedConstructor(new OnlyImplementation()));
 	}
 	
 	function testRepeatedHintJustGetsTwoSeparateInstances() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
 		$this->assertEqual(
-            $injector->instantiate('RepeatedHintConstructor'),
-            new RepeatedHintConstructor(
-                new SecondImplementation(), 
-                new SecondImplementation()));
+				$injector->create('RepeatedHintConstructor'),
+				new RepeatedHintConstructor(new SecondImplementation(), new SecondImplementation()));
 	}
 }
 
@@ -94,7 +87,7 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 		$injector->forVariable('first')->willUse('FirstImplementation');
 		$injector->forVariable('second')->willUse('SecondImplementation');
 		$this->assertEqual(
-				$injector->instantiate('RepeatedHintConstructor'),
+				$injector->create('RepeatedHintConstructor'),
 				new RepeatedHintConstructor(new FirstImplementation(), new SecondImplementation()));
 	}
     
@@ -110,47 +103,9 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 		$injector->willUse('FirstImplementation');
 		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
 		$this->assertEqual(
-				$injector->instantiate('HintedConstructorWithDependencyChoice'),
+				$injector->create('HintedConstructorWithDependencyChoice'),
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
 	}
-}
-
-abstract class Car {
-
-    function __construct(Steering $steering) {
-        $this->steering = $steering;
-    }
-    function getSteering() {
-        return get_class($this->steering);
-    }
-}
-class Jaguar extends Car {}
-class MiniCooper extends Car {}
-
-interface Steering {}
-class RightHandDrive implements Steering {}
-class LeftHandDrive implements Steering {}
-
-class CanSetDifferentPreferencesForInstancesOfTheSameClass extends UnitTestCase {
-    function test() {
-		$globe = new Phemto();
-        $britain = $globe->getSubgraph();
-        $america = $globe->getSubgraph();
-
-        $globe->willUse('Jaguar');
-        $america->willUse('LeftHandDrive');
-        $britain->willUse('RightHandDrive');
-        
-        $car = $america->instantiate('Car');
-        $this->assertEqual(
-            $car->getSteering(), 
-            'LeftHandDrive');
-
-        $car = $britain->instantiate('Car');
-        $this->assertEqual(
-            $car->getSteering(), 
-            'RightHandDrive');
-    }
 }
 
 class CanInstantiateObjectsAsSingletons extends UnitTestCase {
@@ -158,8 +113,8 @@ class CanInstantiateObjectsAsSingletons extends UnitTestCase {
 		$injector = new Phemto();
 		$injector->willUse(new Singleton('LoneClass'));
 		$this->assertSame(
-				$injector->instantiate('LoneClass'),
-				$injector->instantiate('LoneClass'));
+				$injector->create('LoneClass'),
+				$injector->create('LoneClass'));
 	}
 }
 
@@ -172,7 +127,7 @@ class CanInstantiateFromSessions extends UnitTestCase {
 		$injector = new Phemto();
 		$injector->willUse(new Sessionable('slot', 'LoneClass'));
 		$_SESSION['slot'] = false;
-		$lone = $injector->instantiate('LoneClass');
+		$lone = $injector->create('LoneClass');
 		$this->assertSame($lone, $_SESSION['slot']);
 	}
 	
@@ -180,7 +135,7 @@ class CanInstantiateFromSessions extends UnitTestCase {
 		$_SESSION['slot'] = new LoneClass();
 		$injector = new Phemto();
 		$injector->willUse(new Sessionable('slot', 'LoneClass'));
-		$this->assertSame($injector->instantiate('LoneClass'), $_SESSION['slot']);
+		$this->assertSame($injector->create('LoneClass'), $_SESSION['slot']);
 	}
 }
 
@@ -196,7 +151,7 @@ class CanUseSetterInjection extends UnitTestCase {
 		$injector->whenCreating('NeedsInitToCompleteConstruction')->call('init');
 		$expected = new NeedsInitToCompleteConstruction();
 		$expected->init(new LoneClass());
-		$this->assertIdentical($injector->instantiate('NeedsInitToCompleteConstruction'),
+		$this->assertIdentical($injector->create('NeedsInitToCompleteConstruction'),
 							   $expected);
 	}
 }
@@ -215,10 +170,13 @@ class MustBeCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 	function testCanWrapWithDecorator() {
 		$injector = new Phemto();
 		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
-		$this->assertIdentical(
-            $injector->instantiate('Bare'),
-			new WrapperForBare(new BareImplementation()));
+
+		$this->assertIdentical($injector->create('Bare'),
+							   new WrapperForBare(new BareImplementation()));
 	}
+}
+
+class CanEasilyCreateNewLifecycles extends UnitTestCase {
 }
 
 class WorksWithNamespaces extends UnitTestCase {
@@ -226,5 +184,4 @@ class WorksWithNamespaces extends UnitTestCase {
 
 class AsMuchAsPossibleWorksWithAutoload extends UnitTestCase {
 }
-
 ?>

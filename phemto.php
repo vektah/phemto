@@ -8,15 +8,14 @@ class CannotFindImplementation extends Exception {
 }
 
 class MultipleImplementationsPossible extends Exception {
-
-    var $message = 'Found [%d] candidates [%s] for requested [%s]. You must configure Phemto to use one of the candidates.';
+    private $template = 'Found [%d] candidates [%s] for requested [%s]. You must configure Phemto to use one of the candidates.';
 
     function __construct($interface, $candidates) {
-        $this->message = sprintf(
-            $this->message, 
-            count($candidates), 
-            implode(',', $candidates), 
-            $interface);
+        parent::__construct(sprintf(
+                $this->template, 
+                count($candidates), 
+                implode(', ', $candidates), 
+                $interface));
     }
 }
 
@@ -38,8 +37,13 @@ class Phemto {
         }
     }
 
+	/** @deprecated */
     function instantiate($interface, $parameters = array()) {
-        if( !array_key_exists($interface, $this->registry)) {
+		return $this->create($interface, $parameters);
+	}
+
+    function create($interface, $parameters = array()) {
+        if (! array_key_exists($interface, $this->registry)) {
             $this->_registerUnknown($interface);
         }
         if (! isset($this->registry[$interface])) {
@@ -53,26 +57,26 @@ class Phemto {
     }
 
     protected function _registerUnknown($interface) {
-        if(in_array($interface, get_declared_classes())) {
+        if (in_array($interface, get_declared_classes())) {
             $this->willUse($interface);
             return;
         }
-        if( !in_array($interface, get_declared_interfaces())) {
+        if (! in_array($interface, get_declared_interfaces())) {
             return;
         }
         $classes = $this->_getImplementationsOf($interface);
-        if(1 == count($classes)) {
+        if (1 == count($classes)) {
             $this->willUse(array_shift($classes));
             return;
         } else {
-            throw(new MultipleImplementationsPossible($interface, $classes));
+            throw new MultipleImplementationsPossible($interface, $classes);
         }
     }
 
     protected function _getImplementationsOf($interface) {
         $implementations = array();
-        foreach(get_declared_classes() as $class) {
-            if(in_array($interface, class_implements($class))) {
+        foreach (get_declared_classes() as $class) {
+            if (in_array($interface, class_implements($class))) {
                 $implementations[] = $class;
             }
         }
@@ -85,7 +89,6 @@ class Phemto {
             foreach ($constructor->getParameters() as $parameter) {
             	if ($interface = $parameter->getClass()) {
             		$dependencies[] = $this->instantiate($interface->getName());
-                    // $this->_getParametersFor($interface)
             	} elseif (count($supplied)) {
             		$dependencies[] = array_shift($supplied);
             	}

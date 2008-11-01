@@ -19,35 +19,35 @@ class Lonely extends Single { }
 
 class WhenInstantiatingWithoutDependencies extends UnitTestCase {
 
-    function testCanInstantiateSimpleClassWithoutDependencies() {
+    function testCancreateSimpleClassWithoutDependencies() {
         $injector = new Phemto();
         $injector->willUse('One');
-        $this->assertIsA($injector->instantiate('One'), 'One');
+        $this->assertIsA($injector->create('One'), 'One');
     }
 
-    function testCanInstantiateClassFromInterfaceWithoutDependencies() {
+    function testCancreateClassFromInterfaceWithoutDependencies() {
         $injector = new Phemto();
         $injector->willUse('One');
-        $this->assertIsa($injector->instantiate('Number'), 'One');
+        $this->assertIsa($injector->create('Number'), 'One');
     }
 
-    function testCanInstantiateSubclassForSuperclass() {
+    function testCancreateSubclassForSuperclass() {
         $injector = new Phemto();
         $injector->willUse('Single');
-        $this->assertIsA($injector->instantiate('One'), 'Single');
+        $this->assertIsA($injector->create('One'), 'Single');
     }
 
-    function testCanInstantiateSubclassTwoDeepFromSuperclass() {
+    function testCancreateSubclassTwoDeepFromSuperclass() {
         $injector = new Phemto();
         $injector->willUse('Lonely');
-        $this->assertIsA($injector->instantiate('One'), 'Lonely');
+        $this->assertIsA($injector->create('One'), 'Lonely');
     }
 
     function testUsesLastRegisteredClassToFillDependency() {
         $injector = new Phemto();
         $injector->willUse('One');
         $injector->willUse('Two');
-        $this->assertIsA($injector->instantiate('Number'), 'Two');
+        $this->assertIsA($injector->create('Number'), 'Two');
     }
 
     function testMissingClassTriggersException() {
@@ -86,7 +86,7 @@ class WhenInstantiatingWithParameters extends UnitTestCase {
         $injector = new Phemto();
         $injector->willUse('Two');
         $injector->willUse('Doubler');
-        $result = $injector->instantiate('Doubler');
+        $result = $injector->create('Doubler');
         $this->assertEqual($result->result, 4);
     }
 
@@ -95,7 +95,7 @@ class WhenInstantiatingWithParameters extends UnitTestCase {
         $injector->willUse('One');
         $injector->willUse('Two');
         $injector->willUse('Adder');
-        $result = $injector->instantiate('Adder');
+        $result = $injector->create('Adder');
         $this->assertEqual($result->result, 3);
     }
 
@@ -105,7 +105,7 @@ class WhenInstantiatingWithParameters extends UnitTestCase {
         $injector->willUse('Two');
         $injector->willUse('Adder');
         $injector->willUse('Doubler');
-        $result = $injector->instantiate('Doubler');
+        $result = $injector->create('Doubler');
         $this->assertEqual($result->result, 6);
     }
 }
@@ -137,14 +137,14 @@ class WhenFillingConstructorDependencies extends UnitTestCase {
 	function testCanInitialiseWithAStringParameter() {
         $injector = new Phemto();
         $injector->willUse('Greeting');
-		$message = $injector->instantiate('Greeting', array('friend'));
+		$message = $injector->create('Greeting', array('friend'));
 		$this->assertEqual($message->getMessage(), 'Hello friend');
 	}
 
 	function testCanInitialiseInterfaceWithStringParameter() {
         $injector = new Phemto();
         $injector->willUse('Greeting');
-		$message = $injector->instantiate('Message', array('friend'));
+		$message = $injector->create('Message', array('friend'));
 		$this->assertEqual($message->getMessage(), 'Hello friend');
 	}
 
@@ -152,7 +152,7 @@ class WhenFillingConstructorDependencies extends UnitTestCase {
         $injector = new Phemto();
         $injector->willUse('Increaser');
         $injector->willUse('One');
-		$increaser = $injector->instantiate('Increaser', array(13));
+		$increaser = $injector->create('Increaser', array(13));
 		$this->assertEqual($increaser->result, 14);
 	}
 
@@ -160,7 +160,7 @@ class WhenFillingConstructorDependencies extends UnitTestCase {
         $injector = new Phemto();
         $injector->willUse('Increaser');
         $injector->willUse('Two');
-		$increaser = $injector->instantiate('Increaser', array(13, 10));
+		$increaser = $injector->create('Increaser', array(13, 10));
 		$this->assertEqual($increaser->result, 25);
 	}
 }
@@ -171,22 +171,22 @@ class WhenManagingLifecycle extends UnitTestCase {
         $injector = new Phemto();
         $injector->willUse(new Singleton('One'));
         $this->assertIdentical(
-        		$injector->instantiate('Number'),
-        		$injector->instantiate('Number'));
+        		$injector->create('Number'),
+        		$injector->create('Number'));
 	}
 
-	function testCopyInstantiatedWhenRegisteredAsMultiple() {
+	function testCopyCreatedWhenRegisteredAsMultiple() {
         $injector = new Phemto();
         $injector->willUse('One');
         $this->assertClone(
-        		$injector->instantiate('Number'),
-        		$injector->instantiate('Number'));
+        		$injector->create('Number'),
+        		$injector->create('Number'));
 	}
 
 	function testCanInstantiateSingletonWithParameters() {
         $injector = new Phemto();
         $injector->willUse(new Singleton('Greeting', array('me')));
-        $message = $injector->instantiate('Message');
+        $message = $injector->create('Message');
         $this->assertEqual($message->getMessage(), 'Hello me');
 	}
 }
@@ -204,48 +204,46 @@ class WhenApplyingLocationDecorators extends UnitTestCase {
 	function testCanAffectConstructionOnTheWayThrough() {
 		$injector = new Phemto();
 		$injector->willUse(new MessageToYou('Greeting'));
-        $message = $injector->instantiate('Message', array('me'));
+        $message = $injector->create('Message', array('me'));
         $this->assertEqual($message->getMessage(), 'Hello you');
 	}
 }
 
 class Charm {
-    function __construct($a) {
-    }
+    function __construct($a) { }
 }
-/*  bugfix
-*/
-class WhenPassingParameters extends UnitTestCase {
 
+class WhenPassingParameters extends UnitTestCase {
     function setUp() {
         $this->injector = new Phemto;
     }
+    
     function testCanPassAnEmptyString() {
         $this->injector->willUse('Charm');
-        $this->injector->instantiate('Charm', array(''));
-        #$this->assertNoErrors();
+        $this->injector->create('Charm', array(''));
     }
+    
     function testCanPassBooleanFalse() {
         $this->injector->willUse('Charm');
-        $this->injector->instantiate('Charm', array(false));
-        #$this->assertNoErrors();
+        $this->injector->create('Charm', array(false));
     }
+    
     function testCanPassIntegerZero() {
         $this->injector->willUse('Charm');
-        $this->injector->instantiate('Charm', array(0));
-        #$this->assertNoErrors();
+        $this->injector->create('Charm', array(0));
     }
+    
     function testCanPassEmptyArray() {
         $this->injector->willUse('Charm');
-        $this->injector->instantiate('Charm', array(array()));
-        #$this->assertNoErrors();
+        $this->injector->create('Charm', array(array()));
     }
+    
     function testCanPassNull() {
         $this->injector->willUse('Charm');
-        $this->injector->instantiate('Charm', array(null)); 
-        #$this->assertNoErrors();
+        $this->injector->create('Charm', array(null)); 
     }
 }
+
 class WhenRegisteringClasses extends UnitTestCase {
 
     function testCanRegisterFluently() {
@@ -256,42 +254,47 @@ class WhenRegisteringClasses extends UnitTestCase {
         #$this->assertNoErrors();
     }
 }
+
 class Bicycle {
     function __construct(Person $rider) {
         $this->_rider = $rider;
     }
+    
     function getRiderName() {
         return $this->_rider->getName();
     }
 }
+
 class Person {
     function __construct($name) {
         $this->name = $name;
     }
+    
     function getName() {
         return $this->name;
     }
 }
-class WhenPassingParametersToDependencies extends UnitTestCase {
 
+class WhenPassingParametersToDependencies extends UnitTestCase {
     function __construct() {
         $this->injector = new Phemto;
         $this->injector
             ->willUse('Bicycle')
             ->willUse('Person');
     }
+    
     function testCanPassParametersToADependencyWhenInstantiatingTheClient() {
         $bike = $this->injector
             ->pass(array('Jake'))->to('Person')
-            ->instantiate('Bicycle');
+            ->create('Bicycle');
         $this->assertEqual($bike->getRiderName(), 'Jake');
     }
+    
     function testRememberLastParametersPassed() {
         $bike_0 = $this->injector
             ->pass(array('Jake'))->to('Person')
-            ->instantiate('Bicycle');
-        
-        $bike_1 = $this->injector->instantiate('Bicycle');
+            ->create('Bicycle');
+        $bike_1 = $this->injector->create('Bicycle');
         $this->assertEqual($bike_1->getRiderName(), 'Jake');
     }
 }
