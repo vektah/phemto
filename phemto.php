@@ -44,7 +44,7 @@ class Phemto {
 
     function create($interface, $parameters = array()) {
         if (! array_key_exists($interface, $this->registry)) {
-            $this->_registerUnknown($interface);
+            $this->registerUnknown($interface);
         }
         if (! isset($this->registry[$interface])) {
             throw new CannotFindImplementation($interface);
@@ -56,7 +56,7 @@ class Phemto {
         return $locator->instantiate($dependencies);
     }
 
-    protected function _registerUnknown($interface) {
+    protected function registerUnknown($interface) {
         if (in_array($interface, get_declared_classes())) {
             $this->willUse($interface);
             return;
@@ -64,7 +64,7 @@ class Phemto {
         if (! in_array($interface, get_declared_interfaces())) {
             return;
         }
-        $classes = $this->_getImplementationsOf($interface);
+        $classes = $this->getImplementationsOf($interface);
         if (1 == count($classes)) {
             $this->willUse(array_shift($classes));
             return;
@@ -73,7 +73,7 @@ class Phemto {
         }
     }
 
-    protected function _getImplementationsOf($interface) {
+    protected function getImplementationsOf($interface) {
         $implementations = array();
         foreach (get_declared_classes() as $class) {
             if (in_array($interface, class_implements($class))) {
