@@ -97,14 +97,5 @@ class Phemto {
         return $dependencies;
     }
 
-    function pass($parameters) {
-        $this->_parameters = $parameters;
-        return $this;
-    }
-    
-    function to($interface) {
-        $this->registry[$interface]->setParameters($this->_parameters);
-        return $this;
-    }
 }
 ?>
