@@ -1,6 +1,7 @@
 <?php
 require_once('simpletest/autorun.php');
 require_once(dirname(__FILE__) . '/phemto.php');
+require_once(dirname(__FILE__) . '/sessionable.php');
 
 class LoneClass { }
 interface InterfaceWithOneImplementation { }

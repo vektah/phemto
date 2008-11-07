@@ -29,6 +29,22 @@ class Phemto {
         $this->registerLocator($service);
         return $this;
     }
+    
+    function forVariable() {
+        return $this;
+    }
+    
+    function whenCreating() {
+        return $this;
+    }
+    
+    function call() {
+        return $this;
+    }
+    
+    function wrapWith() {
+        return $this;
+    }
 
     protected function registerLocator($locator) {
         $interfaces = $locator->getInterfaces();
