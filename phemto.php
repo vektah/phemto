@@ -76,7 +76,7 @@ class Scope {
     
     function create($type) {
         $lifecycle = $this->pick($this->repository()->candidatesFor($type));
-        $scope = $this->determineScope($type);
+        $scope = $this->determineScope($lifecycle->class);
         return $lifecycle->instantiate($scope->createDependencies($lifecycle->class));
     }
     
@@ -100,9 +100,11 @@ class Scope {
         return $dependencies;
     }
     
-    private function determineScope($type) {
-        if (isset($this->scopes[$type])) {
-            return $this->scopes[$type];
+    private function determineScope($class) {
+        foreach ($this->scopes as $type => $scope) {
+            if ($this->repository()->inScope($class, $type)) {
+                return $scope;
+            }
         }
         return $this;
     }
@@ -210,6 +212,7 @@ class ClassRepository {
     
     function inScope($class, $type) {
         $supertypes = array_merge(
+                array($class),
                 self::$reflection->interfacesOf($class),
                 self::$reflection->parentsOf($class));
         return in_array($type, $supertypes);

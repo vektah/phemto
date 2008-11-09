@@ -126,7 +126,7 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
 	}
     
-	function TODO_testCanOverridePreferenceWhenInstantiatingInterface() {
+	function testCanOverridePreferenceWhenInstantiatingInterface() {
 		$injector = new Phemto();
 		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
 		$injector->willUse('FirstImplementation');
