@@ -78,9 +78,6 @@ class Scope {
         array_unshift($this->setters, $method);
     }
     
-    function wrapWith($decorator) {
-    }
-    
     function create($type) {
         $lifecycle = $this->pick($this->repository()->candidatesFor($type));
         $scope = $this->determineScope($lifecycle->class);
