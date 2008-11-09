@@ -1,117 +1,227 @@
 <?php
-require_once(dirname(__FILE__) . '/locator.php');
-
-class CannotFindImplementation extends Exception {
-    function __construct($interface) {
-        $this->message = "No class registered for interface $interface";
-    }
-}
-
-class MultipleImplementationsPossible extends Exception {
-    private $template = 'Found [%d] candidates [%s] for requested [%s]. You must configure Phemto to use one of the candidates.';
-
-    function __construct($interface, $candidates) {
-        parent::__construct(sprintf(
-                $this->template, 
-                count($candidates), 
-                implode(', ', $candidates), 
-                $interface));
-    }
-}
+class CannotFindImplementation extends Exception { }
+class CannotDetermineImplementation extends Exception { }
 
 class Phemto {
-    protected $registry = array();
-
-    function willUse($service) {
-        if (! $service instanceof PhemtoLocator) {
-            $service = new Locator($service);
-        }
-        $this->registerLocator($service);
-        return $this;
+    private $registry = array();
+    private $variables = array();
+    
+    function willUse($preference) {
+        $lifecycle = $preference instanceof Lifecycle ? $preference : new Factory($preference);
+        array_unshift($this->registry, $lifecycle);
     }
     
-    function forVariable() {
-        return $this;
+    function forVariable($name) {
+        return $this->variables[$name] = new Variable();
     }
     
-    function whenCreating() {
-        return $this;
+    function whenCreating($interface) {
     }
     
-    function call() {
-        return $this;
+    function call($method) {
     }
     
-    function wrapWith() {
-        return $this;
+    function wrap($interface) {
+    }
+    
+    function with($decorator) {
+    }
+    
+    function create($interface, $repository = false) {
+        $repository = $repository ? $repository : new ClassRepository();
+        $lifecycle = $this->pick($repository->candidatesFor($interface));
+        return $lifecycle->instantiate($this->createDependencies($lifecycle->class, $repository));
     }
 
-    protected function registerLocator($locator) {
-        $interfaces = $locator->getInterfaces();
-        foreach ($interfaces as $interface) {
-            $this->registry[$interface] = $locator;
-        }
-    }
-
-	/** @deprecated */
-    function instantiate($interface, $parameters = array()) {
-		return $this->create($interface, $parameters);
-	}
-
-    function create($interface, $parameters = array()) {
-        if (! array_key_exists($interface, $this->registry)) {
-            $this->registerUnknown($interface);
-        }
-        if (! isset($this->registry[$interface])) {
-            throw new CannotFindImplementation($interface);
-        }
-        $locator = $this->registry[$interface];
-        $dependencies = $this->instantiateDependencies(
-        		$locator->getReflection(),
-        		$locator->getParameters($parameters));
-        return $locator->instantiate($dependencies);
-    }
-
-    protected function registerUnknown($interface) {
-        if (in_array($interface, get_declared_classes())) {
-            $this->willUse($interface);
-            return;
-        }
-        if (! in_array($interface, get_declared_interfaces())) {
-            return;
-        }
-        $classes = $this->getImplementationsOf($interface);
-        if (1 == count($classes)) {
-            $this->willUse(array_shift($classes));
-            return;
+    private function pick($candidates) {
+        if (count($candidates) == 0) {
+            throw new CannotFindImplementation();
+        } elseif ($preference = $this->preferFrom($candidates)) {
+            return $preference;
+        } elseif (count($candidates) == 1) {
+            return new Factory($candidates[0]);
         } else {
-            throw new MultipleImplementationsPossible($interface, $classes);
+            throw new CannotDetermineImplementation();
         }
-    }
-
-    protected function getImplementationsOf($interface) {
-        $implementations = array();
-        foreach (get_declared_classes() as $class) {
-            if (in_array($interface, class_implements($class))) {
-                $implementations[] = $class;
-            }
-        }
-        return $implementations;
     }
     
-    protected function instantiateDependencies($reflection, $supplied) {
-    	$dependencies = array();
-        if ($constructor = $reflection->getConstructor()) {
-            foreach ($constructor->getParameters() as $parameter) {
-            	if ($interface = $parameter->getClass()) {
-            		$dependencies[] = $this->instantiate($interface->getName());
-            	} elseif (count($supplied)) {
-            		$dependencies[] = array_shift($supplied);
-            	}
-            }
+    private function createDependencies($class, $repository) {
+        $dependencies = array();
+        foreach ($repository->getConstructorParameters($class) as $parameter) {
+            $dependencies[] = $this->instantiateParameter($parameter, $repository);
         }
         return $dependencies;
     }
+    
+    private function instantiateParameter($parameter, $repository) {
+        try {
+            if ($hint = $parameter->getClass()) {
+                return $this->create($hint->getName(), $repository);
+            }
+        } catch (Exception $e) {
+            return $this->create($this->variables[$parameter->getName()]->interface, $repository);
+        }
+    }
+    
+    private function preferFrom($candidates) {
+        foreach ($this->registry as $preference) {
+            if ($preference->isOneOf($candidates)) {
+                return $preference;
+            }
+        }
+        return false;
+    }
+}
 
+class Variable {
+    public $interface;
+
+    function willUse($interface) {
+        $this->interface = $interface;
+    }
+}
+
+abstract class Lifecycle {
+    public $class;
+
+	function __construct($class) {
+		$this->class = $class;
+	}
+    
+    function isOneOf($candidates) {
+        return in_array($this->class, $candidates);
+    }
+
+    abstract function instantiate($dependencies);
+}
+
+class Factory extends Lifecycle {
+	function instantiate($dependencies) {
+		return call_user_func_array(
+				array(new ReflectionClass($this->class), 'newInstance'),
+				$dependencies);
+	}
+}
+
+class Singleton extends Lifecycle {
+    private $instance;
+    
+	function instantiate($dependencies) {
+        if (! isset($this->instance)) {
+            $this->instance = call_user_func_array(
+                    array(new ReflectionClass($this->class), 'newInstance'),
+                    $dependencies);
+        }
+        return $this->instance;
+	}
+}
+
+class Sessionable extends Lifecycle {
+    private $slot;
+    
+    function __construct($slot, $class) {
+        $this->slot = $slot;
+        parent::__construct($class);
+    }
+    
+	function instantiate($dependencies) {
+        if (! isset($_SESSION[$this->slot])) {
+            $_SESSION[$this->slot] = call_user_func_array(
+                    array(new ReflectionClass($this->class), 'newInstance'),
+                    $dependencies);
+        }
+        return $_SESSION[$this->slot];
+	}
+}
+
+class ClassRepository {
+    private static $reflection = false;
+    
+    function __construct() {
+        if (! self::$reflection) {
+            self::$reflection = new ReflectionCache();
+        }
+        self::$reflection->refresh();
+    }
+    
+    function candidatesFor($interface) {
+        return array_merge(
+                self::$reflection->concreteSubgraphOf($interface),
+                self::$reflection->implementationsOf($interface));
+    }
+    
+    function getConstructorParameters($class) {
+        $reflection = self::$reflection->reflection($class);
+        if ($constructor = $reflection->getConstructor()) {
+            return $constructor->getParameters();
+        }
+        return array();
+    }
+}
+
+class ReflectionCache {
+    private $implementations_of = array();
+    private $interfaces_of = array();
+    private $reflections = array();
+    private $subclasses = array();
+    
+    function refresh() {
+        $this->buildIndex(array_diff(get_declared_classes(), $this->indexed()));
+        $this->subclasses = array();
+    }
+    
+    function implementationsOf($interface) {
+        return isset($this->implementations_of[$interface]) ?
+                $this->implementations_of[$interface] : array();
+    }
+    
+    function concreteSubgraphOf($class) {
+        if (! class_exists($class)) {
+            return array();
+        }
+        if (! isset($this->subclasses[$class])) {
+            $this->subclasses[$class] = $this->isConcrete($class) ? array($class) : array();
+            foreach ($this->indexed() as $candidate) {
+                if (is_subclass_of($candidate, $class) && $this->isConcrete($candidate)) {
+                    $this->subclasses[$class][] = $candidate;
+                }
+            }
+        }
+        return $this->subclasses[$class];
+    }
+    
+    function reflection($class) {
+        if (! isset($this->reflections[$class])) {
+            $this->reflections[$class] = new ReflectionClass($class);
+        }
+        return $this->reflections[$class];
+    }
+    
+    private function isConcrete($class) {
+        return ! $this->reflection($class)->isAbstract();
+    }
+    
+    private function indexed() {
+        return array_keys($this->interfaces_of);
+    }
+    
+    private function buildIndex($classes) {
+        foreach ($classes as $class) {
+            $interfaces = class_implements($class);
+            $this->interfaces_of[$class] = $interfaces;
+            foreach ($interfaces as $interface) {
+                $this->indexImplementation($interface, $class);
+            }
+        }
+    }
+    
+    private function indexImplementation($interface, $class) {
+        if (! isset($this->implementations_of[$interface])) {
+            $this->implementations_of[$interface] = array();
+        }
+        $this->implementations_of[$interface][] = $class;
+        $this->implementations_of[$interface] =
+                array_values(array_unique($this->implementations_of[$interface]));
+    }
 }
 ?>

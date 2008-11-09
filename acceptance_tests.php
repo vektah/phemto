@@ -1,9 +1,35 @@
 <?php
 require_once('simpletest/autorun.php');
 require_once(dirname(__FILE__) . '/phemto.php');
-require_once(dirname(__FILE__) . '/sessionable.php');
 
 class LoneClass { }
+class ClassWithManySubclasses { }
+class FirstSubclass extends ClassWithManySubclasses { }
+class SecondSubclass extends ClassWithManySubclasses { }
+abstract class AbstractClass { }
+class ConcreteSubclass extends AbstractClass { }
+
+class CanAutomaticallyInstantiateKnownClasses extends UnitTestCase {
+	
+    function testNamedClassInstantiatedAutomatically() {
+		$injector = new Phemto();
+		$this->assertIsA($injector->create('LoneClass'), 'LoneClass');
+	}
+    
+    function testWillUseOnlySubclassIfParentIsAbstract() {
+		$injector = new Phemto();
+		$this->assertIsA($injector->create('AbstractClass'),
+						 'ConcreteSubclass');
+    }
+	
+    function testCanBeConfiguredToPreferSpecificSubclass() {
+		$injector = new Phemto();
+		$injector->willUse('SecondSubclass');
+		$this->assertIsA($injector->create('ClassWithManySubclasses'),
+						 'SecondSubclass');
+	}
+}
+
 interface InterfaceWithOneImplementation { }
 class OnlyImplementation implements InterfaceWithOneImplementation { }
 interface InterfaceWithManyImplementations { }
@@ -11,11 +37,6 @@ class FirstImplementation implements InterfaceWithManyImplementations { }
 class SecondImplementation implements InterfaceWithManyImplementations { }
 
 class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
-	
-    function testNamedClassInstantiatedAutomatically() {
-		$injector = new Phemto();
-		$this->assertIsA($injector->create('LoneClass'), 'LoneClass');
-	}
 
     function testInterfaceWithOnlyOneCandidateIsInstantiatedAutomatically() {
 		$injector = new Phemto();
@@ -25,16 +46,13 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 
     function testWillThrowForUnknownClass() {
 		$injector = new Phemto();
-		$this->expectException(new CannotFindImplementation('NonExistent'));
+		$this->expectException('CannotFindImplementation');
 		$injector->create('NonExistent');
 	}
 	
 	function testWillThrowIfInterfaceUnspecified() {
 		$injector = new Phemto();
-		$this->expectException(
-            new MultipleImplementationsPossible(
-                'InterfaceWithManyImplementations', 
-                array('FirstImplementation', 'SecondImplementation')));
+		$this->expectException('CannotDetermineImplementation');
 		$injector->create('InterfaceWithManyImplementations');
 	}
 	
@@ -56,7 +74,7 @@ class HintedConstructor implements Hinted {
 
 class HintedConstructorWithDependencyChoice implements Hinted {
 	function __construct(InterfaceWithManyImplementations $alternate) {
-		$this->altternate = $alternate;
+		$this->alternate = $alternate;
 	}
 }
 
@@ -92,17 +110,17 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 				new RepeatedHintConstructor(new FirstImplementation(), new SecondImplementation()));
 	}
     
-    function testTypeHintsTakePrecedence() {
+    function TODO_testTypeHintsTakePrecedence() {
         // or do they? specify one or the other
     }
 
 }
 
 class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
-	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
+	function TODO_testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
 		$injector = new Phemto();
-		$injector->willUse('FirstImplementation');
 		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
+		$injector->willUse('FirstImplementation');
 		$this->assertEqual(
 				$injector->create('HintedConstructorWithDependencyChoice'),
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
@@ -147,7 +165,7 @@ class NeedsInitToCompleteConstruction {
 }
 
 class CanUseSetterInjection extends UnitTestCase {
-	function testCanCallSettersToCompleteInitialisation() {
+	function TODO_testCanCallSettersToCompleteInitialisation() {
 		$injector = new Phemto();
 		$injector->whenCreating('NeedsInitToCompleteConstruction')->call('init');
 		$expected = new NeedsInitToCompleteConstruction();
@@ -167,11 +185,10 @@ class MustBeEasyToAppendToWiringFile extends UnitTestCase {
     // "everything must be override-able"
 }
 
-class MustBeCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
-	function testCanWrapWithDecorator() {
+class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
+	function TODO_testCanWrapWithDecorator() {
 		$injector = new Phemto();
-		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
-
+		$injector->wrap('Bare')->with('WrapperForBare');
 		$this->assertIdentical($injector->create('Bare'),
 							   new WrapperForBare(new BareImplementation()));
 	}
