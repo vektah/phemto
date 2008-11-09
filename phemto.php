@@ -138,8 +138,11 @@ class Scope {
                 return $this->create($hint->getName());
             }
         } catch (Exception $e) {
-            return $this->create($this->variables[$parameter->getName()]->interface);
+            if (isset($this->variables[$parameter->getName()])) {
+                return $this->create($this->variables[$parameter->getName()]->interface);
+            }
         }
+        return $this->parent->instantiateParameter($parameter);
     }
     
     private function preferFrom($candidates) {

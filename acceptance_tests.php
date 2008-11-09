@@ -174,7 +174,7 @@ class NeedsInitToCompleteConstruction {
 }
 
 class CanUseSetterInjection extends UnitTestCase {
-	function TODO_testCanCallSettersToCompleteInitialisation() {
+	function testCanCallSettersToCompleteInitialisation() {
 		$injector = new Phemto();
 		$injector->whenCreating('NeedsInitToCompleteConstruction')->call('init');
 		$expected = new NeedsInitToCompleteConstruction();
