@@ -2,6 +2,7 @@
 class CannotFindImplementation extends Exception { }
 class CannotDetermineImplementation extends Exception { }
 class SetterDoesNotExist extends Exception { }
+class MissingDependency extends Exception { }
 
 class Phemto {
     private $top;
@@ -26,12 +27,6 @@ class Phemto {
         $this->top->call($method);
     }
     
-    function wrap($type) {
-    }
-    
-    function with($decorator) {
-    }
-    
     function create($type) {
         $this->repository = new ClassRepository();
         return $this->top->create($type);
@@ -44,6 +39,10 @@ class Phemto {
     function settersFor($class) {
         return array();
     }
+
+    function instantiateParameter($parameter) {
+        throw new MissingDependency();
+    }
     
     function repository() {
         return $this->repository;
@@ -51,26 +50,26 @@ class Phemto {
 }
 
 class Scope {
+    private $parent;
     private $repository;
     private $registry = array();
     private $variables = array();
-    private $parent = false;
     private $scopes = array();
     private $setters = array();
-    
+
     function __construct($parent) {
         $this->parent = $parent;
     }
-    
+
     function willUse($preference) {
         $lifecycle = $preference instanceof Lifecycle ? $preference : new Factory($preference);
         array_unshift($this->registry, $lifecycle);
     }
-    
+
     function forVariable($name) {
         return $this->variables[$name] = new Variable();
     }
-    
+
     function whenCreating($type) {
         return $this->scopes[$type] = new Scope($this);
     }
@@ -79,7 +78,7 @@ class Scope {
         array_unshift($this->setters, $method);
     }
     
-    function wrap($decorator) {
+    function wrapWith($decorator) {
     }
     
     function create($type) {
@@ -102,7 +101,7 @@ class Scope {
         } elseif (count($candidates) == 1) {
             return new Factory($candidates[0]);
         } else {
-            $this->parent->pick($candidates);
+            return $this->parent->pick($candidates);
         }
     }
     
@@ -112,11 +111,20 @@ class Scope {
     }
     
     function createDependencies($parameters) {
-        $dependencies = array();
-        foreach ($parameters as $parameter) {
-            $dependencies[] = $this->instantiateParameter($parameter);
+        return array_map(array($this, 'instantiateParameter'), $parameters);
+    }
+    
+    function instantiateParameter($parameter) {
+        try {
+            if ($hint = $parameter->getClass()) {
+                return $this->create($hint->getName());
+            }
+        } catch (Exception $e) {
+            if (isset($this->variables[$parameter->getName()])) {
+                return $this->create($this->variables[$parameter->getName()]->interface);
+            }
         }
-        return $dependencies;
+        return $this->parent->instantiateParameter($parameter);
     }
     
     private function determineScope($class) {
@@ -130,19 +138,6 @@ class Scope {
     
     private function invoke($instance, $method, $arguments) {
         call_user_func_array(array($instance, $method), $arguments);
-    }
-    
-    private function instantiateParameter($parameter) {
-        try {
-            if ($hint = $parameter->getClass()) {
-                return $this->create($hint->getName());
-            }
-        } catch (Exception $e) {
-            if (isset($this->variables[$parameter->getName()])) {
-                return $this->create($this->variables[$parameter->getName()]->interface);
-            }
-        }
-        return $this->parent->instantiateParameter($parameter);
     }
     
     private function preferFrom($candidates) {

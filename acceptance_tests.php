@@ -195,9 +195,9 @@ class MustBeEasyToAppendToWiringFile extends UnitTestCase {
 }
 
 class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
-	function TODO_testCanWrapWithDecorator() {
+	function testCanWrapWithDecorator() {
 		$injector = new Phemto();
-		$injector->whenCreating('Bare')->wrap('WrapperForBare');
+		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
 		$this->assertIdentical($injector->create('Bare'),
 							   new WrapperForBare(new BareImplementation()));
 	}
