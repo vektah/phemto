@@ -3,8 +3,57 @@ class CannotFindImplementation extends Exception { }
 class CannotDetermineImplementation extends Exception { }
 
 class Phemto {
+    private $top;
+    
+    function __construct() {
+        $this->top = new Scope($this);
+    }
+    
+    function willUse($preference) {
+        $this->top->willUse($preference);
+    }
+    
+    function forVariable($name) {
+        return $this->top->forVariable($name);
+    }
+    
+    function whenCreating($type) {
+        return $this->top->whenCreating($type);
+    }
+    
+    function call($method) {
+    }
+    
+    function wrap($type) {
+    }
+    
+    function with($decorator) {
+    }
+    
+    function create($type) {
+        $this->repository = new ClassRepository();
+        return $this->top->create($type);
+    }
+    
+    function pick($candidates) {
+        throw new CannotDetermineImplementation();
+    }
+    
+    function repository() {
+        return $this->repository;
+    }
+}
+
+class Scope {
+    private $repository;
     private $registry = array();
     private $variables = array();
+    private $parent = false;
+    private $scopes = array();
+    
+    function __construct($parent) {
+        $this->parent = $parent;
+    }
     
     function willUse($preference) {
         $lifecycle = $preference instanceof Lifecycle ? $preference : new Factory($preference);
@@ -15,25 +64,23 @@ class Phemto {
         return $this->variables[$name] = new Variable();
     }
     
-    function whenCreating($interface) {
+    function whenCreating($type) {
+        return $this->scopes[$type] = new Scope($this);
     }
     
     function call($method) {
     }
     
-    function wrap($interface) {
+    function wrap($decorator) {
     }
     
-    function with($decorator) {
+    function create($type) {
+        $lifecycle = $this->pick($this->repository()->candidatesFor($type));
+        $scope = $this->determineScope($type);
+        return $lifecycle->instantiate($scope->createDependencies($lifecycle->class));
     }
     
-    function create($interface, $repository = false) {
-        $repository = $repository ? $repository : new ClassRepository();
-        $lifecycle = $this->pick($repository->candidatesFor($interface));
-        return $lifecycle->instantiate($this->createDependencies($lifecycle->class, $repository));
-    }
-
-    private function pick($candidates) {
+    function pick($candidates) {
         if (count($candidates) == 0) {
             throw new CannotFindImplementation();
         } elseif ($preference = $this->preferFrom($candidates)) {
@@ -41,25 +88,32 @@ class Phemto {
         } elseif (count($candidates) == 1) {
             return new Factory($candidates[0]);
         } else {
-            throw new CannotDetermineImplementation();
+            $this->parent->pick($candidates);
         }
     }
     
-    private function createDependencies($class, $repository) {
+    function createDependencies($class) {
         $dependencies = array();
-        foreach ($repository->getConstructorParameters($class) as $parameter) {
-            $dependencies[] = $this->instantiateParameter($parameter, $repository);
+        foreach ($this->repository()->getConstructorParameters($class) as $parameter) {
+            $dependencies[] = $this->instantiateParameter($parameter);
         }
         return $dependencies;
     }
     
-    private function instantiateParameter($parameter, $repository) {
+    private function determineScope($type) {
+        if (isset($this->scopes[$type])) {
+            return $this->scopes[$type];
+        }
+        return $this;
+    }
+    
+    private function instantiateParameter($parameter) {
         try {
             if ($hint = $parameter->getClass()) {
-                return $this->create($hint->getName(), $repository);
+                return $this->create($hint->getName());
             }
         } catch (Exception $e) {
-            return $this->create($this->variables[$parameter->getName()]->interface, $repository);
+            return $this->create($this->variables[$parameter->getName()]->interface);
         }
     }
     
@@ -70,6 +124,10 @@ class Phemto {
             }
         }
         return false;
+    }
+    
+    function repository() {
+        return $this->parent->repository();
     }
 }
 
@@ -150,6 +208,13 @@ class ClassRepository {
                 self::$reflection->implementationsOf($interface));
     }
     
+    function inScope($class, $type) {
+        $supertypes = array_merge(
+                self::$reflection->interfacesOf($class),
+                self::$reflection->parentsOf($class));
+        return in_array($type, $supertypes);
+    }
+    
     function getConstructorParameters($class) {
         $reflection = self::$reflection->reflection($class);
         if ($constructor = $reflection->getConstructor()) {
@@ -164,6 +229,7 @@ class ReflectionCache {
     private $interfaces_of = array();
     private $reflections = array();
     private $subclasses = array();
+    private $parents = array();
     
     function refresh() {
         $this->buildIndex(array_diff(get_declared_classes(), $this->indexed()));
@@ -173,6 +239,11 @@ class ReflectionCache {
     function implementationsOf($interface) {
         return isset($this->implementations_of[$interface]) ?
                 $this->implementations_of[$interface] : array();
+    }
+    
+    function interfacesOf($class) {
+        return isset($this->interfaces_of[$class]) ?
+                $this->interfaces_of[$class] : array();
     }
     
     function concreteSubgraphOf($class) {
@@ -188,6 +259,13 @@ class ReflectionCache {
             }
         }
         return $this->subclasses[$class];
+    }
+    
+    function parentsOf($class) {
+        if (! isset($this->parents[$class])) {
+            $this->parents[$class] = class_parents($class);
+        }
+        return $this->parents[$class];
     }
     
     function reflection($class) {
@@ -210,12 +288,12 @@ class ReflectionCache {
             $interfaces = class_implements($class);
             $this->interfaces_of[$class] = $interfaces;
             foreach ($interfaces as $interface) {
-                $this->indexImplementation($interface, $class);
+                $this->crossReference($interface, $class);
             }
         }
     }
     
-    private function indexImplementation($interface, $class) {
+    private function crossReference($interface, $class) {
         if (! isset($this->implementations_of[$interface])) {
             $this->implementations_of[$interface] = array();
         }

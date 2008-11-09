@@ -117,7 +117,16 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 }
 
 class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
-	function TODO_testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
+	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
+		$injector = new Phemto();
+		$injector->whenCreating('HintedConstructorWithDependencyChoice')->willUse('SecondImplementation');
+		$injector->willUse('FirstImplementation');
+		$this->assertEqual(
+				$injector->create('HintedConstructorWithDependencyChoice'),
+				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
+	}
+    
+	function TODO_testCanOverridePreferenceWhenInstantiatingInterface() {
 		$injector = new Phemto();
 		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
 		$injector->willUse('FirstImplementation');
@@ -188,7 +197,7 @@ class MustBeEasyToAppendToWiringFile extends UnitTestCase {
 class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 	function TODO_testCanWrapWithDecorator() {
 		$injector = new Phemto();
-		$injector->wrap('Bare')->with('WrapperForBare');
+		$injector->whenCreating('Bare')->wrap('WrapperForBare');
 		$this->assertIdentical($injector->create('Bare'),
 							   new WrapperForBare(new BareImplementation()));
 	}
