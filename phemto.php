@@ -1,6 +1,7 @@
 <?php
 class CannotFindImplementation extends Exception { }
 class CannotDetermineImplementation extends Exception { }
+class SetterDoesNotExist extends Exception { }
 
 class Phemto {
     private $top;
@@ -22,6 +23,7 @@ class Phemto {
     }
     
     function call($method) {
+        $this->top->call($method);
     }
     
     function wrap($type) {
@@ -39,6 +41,10 @@ class Phemto {
         throw new CannotDetermineImplementation();
     }
     
+    function settersFor($class) {
+        return array();
+    }
+    
     function repository() {
         return $this->repository;
     }
@@ -50,6 +56,7 @@ class Scope {
     private $variables = array();
     private $parent = false;
     private $scopes = array();
+    private $setters = array();
     
     function __construct($parent) {
         $this->parent = $parent;
@@ -69,6 +76,7 @@ class Scope {
     }
     
     function call($method) {
+        array_unshift($this->setters, $method);
     }
     
     function wrap($decorator) {
@@ -77,7 +85,13 @@ class Scope {
     function create($type) {
         $lifecycle = $this->pick($this->repository()->candidatesFor($type));
         $scope = $this->determineScope($lifecycle->class);
-        return $lifecycle->instantiate($scope->createDependencies($lifecycle->class));
+        $instance = $lifecycle->instantiate($scope->createDependencies(
+                        $this->repository()->getConstructorParameters($lifecycle->class)));
+        foreach ($scope->settersFor($lifecycle->class) as $setter) {
+            $scope->invoke($instance, $setter, $scope->createDependencies(
+                                $this->repository()->getParameters($lifecycle->class, $setter)));
+        }
+        return $instance;
     }
     
     function pick($candidates) {
@@ -92,9 +106,14 @@ class Scope {
         }
     }
     
-    function createDependencies($class) {
+    function settersFor($class) {
+        return array_values(array_unique(array_merge(
+                    $this->setters, $this->parent->settersFor($class))));
+    }
+    
+    function createDependencies($parameters) {
         $dependencies = array();
-        foreach ($this->repository()->getConstructorParameters($class) as $parameter) {
+        foreach ($parameters as $parameter) {
             $dependencies[] = $this->instantiateParameter($parameter);
         }
         return $dependencies;
@@ -107,6 +126,10 @@ class Scope {
             }
         }
         return $this;
+    }
+    
+    private function invoke($instance, $method, $arguments) {
+        call_user_func_array(array($instance, $method), $arguments);
     }
     
     private function instantiateParameter($parameter) {
@@ -224,6 +247,14 @@ class ClassRepository {
             return $constructor->getParameters();
         }
         return array();
+    }
+    
+    function getParameters($class, $method) {
+        $reflection = self::$reflection->reflection($class);
+        if (! $reflection->hasMethod($method)) {
+            throw new SetterDoesNotExist();
+        }
+        return $reflection->getMethod($method)->getParameters();
     }
 }
 
