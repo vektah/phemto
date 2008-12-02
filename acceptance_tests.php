@@ -10,18 +10,18 @@ abstract class AbstractClass { }
 class ConcreteSubclass extends AbstractClass { }
 
 class CanAutomaticallyInstantiateKnownClasses extends UnitTestCase {
-	
+
     function testNamedClassInstantiatedAutomatically() {
 		$injector = new Phemto();
 		$this->assertIsA($injector->create('LoneClass'), 'LoneClass');
 	}
-    
+
     function testWillUseOnlySubclassIfParentIsAbstract() {
 		$injector = new Phemto();
 		$this->assertIsA($injector->create('AbstractClass'),
 						 'ConcreteSubclass');
     }
-	
+
     function testCanBeConfiguredToPreferSpecificSubclass() {
 		$injector = new Phemto();
 		$injector->willUse('SecondSubclass');
@@ -49,13 +49,13 @@ class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 		$this->expectException('CannotFindImplementation');
 		$injector->create('NonExistent');
 	}
-	
+
 	function testWillThrowIfInterfaceUnspecified() {
 		$injector = new Phemto();
 		$this->expectException('CannotDetermineImplementation');
 		$injector->create('InterfaceWithManyImplementations');
 	}
-	
+
     function testCanBeConfiguredToPreferSpecificImplementation() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
@@ -90,7 +90,7 @@ class CanAutomaticallyInjectTypeHintedDependencies extends UnitTestCase {
 		$this->assertIdentical($injector->create('HintedConstructor'),
 							   new HintedConstructor(new OnlyImplementation()));
 	}
-	
+
 	function testRepeatedHintJustGetsTwoSeparateInstances() {
 		$injector = new Phemto();
 		$injector->willUse('SecondImplementation');
@@ -109,7 +109,7 @@ class CanInjectDependenciesByVariableName extends UnitTestCase {
 				$injector->create('RepeatedHintConstructor'),
 				new RepeatedHintConstructor(new FirstImplementation(), new SecondImplementation()));
 	}
-    
+
     function TODO_testTypeHintsTakePrecedence() {
         // or do they? specify one or the other
     }
@@ -125,7 +125,7 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 				$injector->create('HintedConstructorWithDependencyChoice'),
 				new HintedConstructorWithDependencyChoice(new SecondImplementation()));
 	}
-    
+
 	function testCanOverridePreferenceWhenInstantiatingInterface() {
 		$injector = new Phemto();
 		$injector->whenCreating('Hinted')->willUse('SecondImplementation');
@@ -150,7 +150,7 @@ class CanInstantiateFromSessions extends UnitTestCase {
 	function tearDown() {
 		$_SESSION['slot'] = false;
 	}
-	
+
 	function testSessionableInstanceWrittenToSession() {
 		$injector = new Phemto();
 		$injector->willUse(new Sessionable('slot', 'LoneClass'));
@@ -158,7 +158,7 @@ class CanInstantiateFromSessions extends UnitTestCase {
 		$lone = $injector->create('LoneClass');
 		$this->assertSame($lone, $_SESSION['slot']);
 	}
-	
+
 	function testSessionableInstancePulledFromSessionIfExists() {
 		$_SESSION['slot'] = new LoneClass();
 		$injector = new Phemto();
@@ -190,10 +190,6 @@ class WrapperForBare {
 	function __construct(Bare $bare) { $this->bare = $bare; }
 }
 
-class MustBeEasyToAppendToWiringFile extends UnitTestCase {
-    // "everything must be override-able"
-}
-
 class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 	function TODO_testCanWrapWithDecorator() {
 		$injector = new Phemto();
@@ -201,6 +197,10 @@ class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 		$this->assertIdentical($injector->create('Bare'),
 							   new WrapperForBare(new BareImplementation()));
 	}
+}
+
+class MustBeEasyToAppendToWiringFile extends UnitTestCase {
+    // "everything must be override-able"
 }
 
 class CanEasilyCreateNewLifecycles extends UnitTestCase {
