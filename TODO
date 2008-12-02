@@ -1,4 +1,5 @@
-Tasks for alpha3 release.
+For alpha3 release.
+===================
 
 This is an interface release. I.e. the code does not work in any exhaustive way,
 it just illustrates the direction of the project.
@@ -9,3 +10,9 @@ In priority order...
 * Can fill dependencies with explicit values
 * Add parameters to Reused lifecycle.
 * Add parameters to Singleton lifecycle.
+
+For beta release
+================
+* Add exceptions for likely errors
+* Profile to find performance trouble spots.
+* Iron out scoping surprises
