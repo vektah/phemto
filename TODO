@@ -1,26 +1,12 @@
-Tasks for alpha3 release
+Tasks for alpha3 release.
+
+This is an interface release. I.e. the code does not work in any exhaustive way,
+it just illustrates the direction of the project.
 
 In priority order...
 --------------------
-* Add decorator behaviour
-
-Fulfill MustHaveCleanSyntaxForDecoratorsAndFilters acceptance test.
-
 * Add test cases for named parameters
-
-Acceptance test of the form:
-$injector->create('Thing', array('a' => 'hello'));
-
 * Add test cases for unnamed parameters
-
-Acceptance test of the form:
-$injector->create('Thing', array('hello'));
-
-* Write a proper Singleton
-
-Currently creates an instance for each factory. Should really
-have a static registry process wide.
-
-* Add parameters to Shared lifecycle
-
-* Add parameters to Singleton lifecycle
+* Write a Singleton lifecycle.
+* Add parameters to Reused lifecycle.
+* Add parameters to Singleton lifecycle.
