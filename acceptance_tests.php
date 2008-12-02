@@ -199,6 +199,35 @@ class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
 	}
 }
 
+class ClassWithParameter {
+    function __construct($a, $b) { @$this->a = $a; @$this->b = $b; }
+}
+
+class CanInstantiateWithNamedParameters extends UnitTestCase {
+    function TODO_testCanFillMissingParametersWithExplicitValues() {
+		$injector = new Phemto();
+        $this->assertIdentical(
+                $injector->fill('a', 'b')->with(3, 5)->create('ClassWithParameter'),
+                new ClassWithParameter(3, 5));
+    }
+}
+
+class CanInstantiateWithAnonymousParameters extends UnitTestCase {
+    function TODO_testCanFillMissingParametersWithExplicitValues() {
+		$injector = new Phemto();
+        $this->assertIdentical(
+                $injector->with(3, 5)->create('ClassWithParameter'),
+                new ClassWithParameter(3, 5));
+    }
+    
+    function TODO_testCanUseShorterSyntacticForm() {
+		$injector = new Phemto();
+        $this->assertIdentical(
+                $injector->create('ClassWithParameter', 3, 5),
+                new ClassWithParameter(3, 5));
+    }
+}
+
 class MustBeEasyToAppendMoreConfigurationToAnExistingWiringFile extends UnitTestCase {
     // "everything must be override-able"
 }

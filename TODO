@@ -5,8 +5,7 @@ it just illustrates the direction of the project.
 
 In priority order...
 --------------------
-* Add test cases for named parameters
-* Add test cases for unnamed parameters
 * Write a Singleton lifecycle.
 * Add parameters to Reused lifecycle.
 * Add parameters to Singleton lifecycle.
+* Can fill dependencies with explicit values
