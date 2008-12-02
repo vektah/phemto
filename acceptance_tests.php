@@ -137,9 +137,9 @@ class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
 }
 
 class CanInstantiateObjectsAsSingletons extends UnitTestCase {
-	function testSameInstanceIsReusedForSingleton() {
+	function testSameInstanceCanBeReusedWithinFactory() {
 		$injector = new Phemto();
-		$injector->willUse(new Singleton('LoneClass'));
+		$injector->willUse(new Reused('LoneClass'));
 		$this->assertSame(
 				$injector->create('LoneClass'),
 				$injector->create('LoneClass'));
@@ -191,15 +191,15 @@ class WrapperForBare {
 }
 
 class MustHaveCleanSyntaxForDecoratorsAndFilters extends UnitTestCase {
-	function TODO_testCanWrapWithDecorator() {
+	function testCanWrapWithDecorator() {
 		$injector = new Phemto();
-		$injector->wrap('Bare')->with('WrapperForBare');
+		$injector->whenCreating('Bare')->wrapWith('WrapperForBare');
 		$this->assertIdentical($injector->create('Bare'),
 							   new WrapperForBare(new BareImplementation()));
 	}
 }
 
-class MustBeEasyToAppendToWiringFile extends UnitTestCase {
+class MustBeEasyToAppendMoreConfigurationToAnExistingWiringFile extends UnitTestCase {
     // "everything must be override-able"
 }
 

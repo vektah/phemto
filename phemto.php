@@ -6,44 +6,48 @@ class MissingDependency extends Exception { }
 
 class Phemto {
     private $top;
-    
+
     function __construct() {
         $this->top = new Scope($this);
     }
-    
+
     function willUse($preference) {
         $this->top->willUse($preference);
     }
-    
+
     function forVariable($name) {
         return $this->top->forVariable($name);
     }
-    
+
     function whenCreating($type) {
         return $this->top->whenCreating($type);
     }
-    
+
     function call($method) {
         $this->top->call($method);
     }
-    
+
     function create($type) {
         $this->repository = new ClassRepository();
         return $this->top->create($type);
     }
-    
-    function pick($candidates) {
+
+    function pickFrom($candidates) {
         throw new CannotDetermineImplementation();
     }
-    
+
     function settersFor($class) {
+        return array();
+    }
+
+    function wrappersFor($type) {
         return array();
     }
 
     function instantiateParameter($parameter) {
         throw new MissingDependency();
     }
-    
+
     function repository() {
         return $this->repository;
     }
@@ -56,6 +60,7 @@ class Scope {
     private $variables = array();
     private $scopes = array();
     private $setters = array();
+    private $wrappers = array();
 
     function __construct($parent) {
         $this->parent = $parent;
@@ -73,24 +78,42 @@ class Scope {
     function whenCreating($type) {
         return $this->scopes[$type] = new Scope($this);
     }
-    
+
     function call($method) {
         array_unshift($this->setters, $method);
     }
-    
-    function create($type) {
-        $lifecycle = $this->pick($this->repository()->candidatesFor($type));
+
+    function wrapWith($type) {
+        array_push($this->wrappers, $type);
+    }
+
+    function create($type, $nesting = array()) {
+        $lifecycle = $this->pickFrom($this->repository()->candidatesFor($type));
         $scope = $this->determineScope($lifecycle->class);
+        if ($wrapper = $scope->hasWrapper($type, $nesting)) {
+            return $this->create($wrapper, $this->cons($wrapper, $nesting));
+        }
         $instance = $lifecycle->instantiate($scope->createDependencies(
-                        $this->repository()->getConstructorParameters($lifecycle->class)));
+                        $this->repository()->getConstructorParameters($lifecycle->class),
+                        $this->cons($lifecycle->class, $nesting)));
         foreach ($scope->settersFor($lifecycle->class) as $setter) {
             $scope->invoke($instance, $setter, $scope->createDependencies(
-                                $this->repository()->getParameters($lifecycle->class, $setter)));
+                                $this->repository()->getParameters($lifecycle->class, $setter),
+                                $this->cons($lifecycle->class, $nesting)));
         }
         return $instance;
     }
-    
-    function pick($candidates) {
+
+    function hasWrapper($type, $already_applied) {
+        foreach ($this->wrappersFor($type) as $wrapper) {
+            if (! in_array($wrapper, $already_applied)) {
+                return $wrapper;
+            }
+        }
+        return false;;
+    }
+
+    function pickFrom($candidates) {
         if (count($candidates) == 0) {
             throw new CannotFindImplementation();
         } elseif ($preference = $this->preferFrom($candidates)) {
@@ -98,32 +121,41 @@ class Scope {
         } elseif (count($candidates) == 1) {
             return new Factory($candidates[0]);
         } else {
-            return $this->parent->pick($candidates);
+            return $this->parent->pickFrom($candidates);
         }
     }
-    
+
     function settersFor($class) {
         return array_values(array_unique(array_merge(
                     $this->setters, $this->parent->settersFor($class))));
     }
-    
-    function createDependencies($parameters) {
-        return array_map(array($this, 'instantiateParameter'), $parameters);
+
+    function wrappersFor($type) {
+        return array_values(array_merge(
+                    $this->wrappers, $this->parent->wrappersFor($type)));
     }
-    
-    function instantiateParameter($parameter) {
+
+    function createDependencies($parameters, $nesting) {
+        $values = array();
+        foreach ($parameters as $parameter) {
+            $values[] = $this->instantiateParameter($parameter, $nesting);
+        }
+        return $values;
+    }
+
+    function instantiateParameter($parameter, $nesting) {
         try {
             if ($hint = $parameter->getClass()) {
-                return $this->create($hint->getName());
+                return $this->create($hint->getName(), $nesting);
             }
         } catch (Exception $e) {
             if (isset($this->variables[$parameter->getName()])) {
-                return $this->create($this->variables[$parameter->getName()]->interface);
+                return $this->create($this->variables[$parameter->getName()]->interface, $nesting);
             }
         }
-        return $this->parent->instantiateParameter($parameter);
+        return $this->parent->instantiateParameter($parameter, $nesting);
     }
-    
+
     private function determineScope($class) {
         foreach ($this->scopes as $type => $scope) {
             if ($this->repository()->inScope($class, $type)) {
@@ -132,11 +164,11 @@ class Scope {
         }
         return $this;
     }
-    
+
     private function invoke($instance, $method, $arguments) {
         call_user_func_array(array($instance, $method), $arguments);
     }
-    
+
     private function preferFrom($candidates) {
         foreach ($this->registry as $preference) {
             if ($preference->isOneOf($candidates)) {
@@ -145,7 +177,12 @@ class Scope {
         }
         return false;
     }
-    
+
+    function cons($head, $tail) {
+        array_unshift($tail, $head);
+        return $tail;
+    }
+
     function repository() {
         return $this->parent->repository();
     }
@@ -165,7 +202,7 @@ abstract class Lifecycle {
 	function __construct($class) {
 		$this->class = $class;
 	}
-    
+
     function isOneOf($candidates) {
         return in_array($this->class, $candidates);
     }
@@ -181,9 +218,9 @@ class Factory extends Lifecycle {
 	}
 }
 
-class Singleton extends Lifecycle {
+class Reused extends Lifecycle {
     private $instance;
-    
+
 	function instantiate($dependencies) {
         if (! isset($this->instance)) {
             $this->instance = call_user_func_array(
@@ -196,12 +233,12 @@ class Singleton extends Lifecycle {
 
 class Sessionable extends Lifecycle {
     private $slot;
-    
+
     function __construct($slot, $class) {
         $this->slot = $slot;
         parent::__construct($class);
     }
-    
+
 	function instantiate($dependencies) {
         if (! isset($_SESSION[$this->slot])) {
             $_SESSION[$this->slot] = call_user_func_array(
@@ -214,20 +251,20 @@ class Sessionable extends Lifecycle {
 
 class ClassRepository {
     private static $reflection = false;
-    
+
     function __construct() {
         if (! self::$reflection) {
             self::$reflection = new ReflectionCache();
         }
         self::$reflection->refresh();
     }
-    
+
     function candidatesFor($interface) {
         return array_merge(
                 self::$reflection->concreteSubgraphOf($interface),
                 self::$reflection->implementationsOf($interface));
     }
-    
+
     function inScope($class, $type) {
         $supertypes = array_merge(
                 array($class),
@@ -235,7 +272,7 @@ class ClassRepository {
                 self::$reflection->parentsOf($class));
         return in_array($type, $supertypes);
     }
-    
+
     function getConstructorParameters($class) {
         $reflection = self::$reflection->reflection($class);
         if ($constructor = $reflection->getConstructor()) {
@@ -243,7 +280,7 @@ class ClassRepository {
         }
         return array();
     }
-    
+
     function getParameters($class, $method) {
         $reflection = self::$reflection->reflection($class);
         if (! $reflection->hasMethod($method)) {
@@ -259,22 +296,22 @@ class ReflectionCache {
     private $reflections = array();
     private $subclasses = array();
     private $parents = array();
-    
+
     function refresh() {
         $this->buildIndex(array_diff(get_declared_classes(), $this->indexed()));
         $this->subclasses = array();
     }
-    
+
     function implementationsOf($interface) {
         return isset($this->implementations_of[$interface]) ?
                 $this->implementations_of[$interface] : array();
     }
-    
+
     function interfacesOf($class) {
         return isset($this->interfaces_of[$class]) ?
                 $this->interfaces_of[$class] : array();
     }
-    
+
     function concreteSubgraphOf($class) {
         if (! class_exists($class)) {
             return array();
@@ -289,29 +326,29 @@ class ReflectionCache {
         }
         return $this->subclasses[$class];
     }
-    
+
     function parentsOf($class) {
         if (! isset($this->parents[$class])) {
             $this->parents[$class] = class_parents($class);
         }
         return $this->parents[$class];
     }
-    
+
     function reflection($class) {
         if (! isset($this->reflections[$class])) {
             $this->reflections[$class] = new ReflectionClass($class);
         }
         return $this->reflections[$class];
     }
-    
+
     private function isConcrete($class) {
         return ! $this->reflection($class)->isAbstract();
     }
-    
+
     private function indexed() {
         return array_keys($this->interfaces_of);
     }
-    
+
     private function buildIndex($classes) {
         foreach ($classes as $class) {
             $interfaces = class_implements($class);
@@ -321,7 +358,7 @@ class ReflectionCache {
             }
         }
     }
-    
+
     private function crossReference($interface, $class) {
         if (! isset($this->implementations_of[$interface])) {
             $this->implementations_of[$interface] = array();

@@ -16,7 +16,11 @@ $injector->create('Thing', array('a' => 'hello'));
 Acceptance test of the form:
 $injector->create('Thing', array('hello'));
 
-* Change Singleton to Recycled and write a proper Singleton
+* Write a proper Singleton
 
 Currently creates an instance for each factory. Should really
 have a static registry process wide.
+
+* Add parameters to Shared lifecycle
+
+* Add parameters to Singleton lifecycle
