@@ -6,6 +6,8 @@ class MissingDependency extends Exception { }
 
 class Phemto {
     private $top;
+    private $named_parameters = array();
+    private $unnamed_parameters = array();
 
     function __construct() {
         $this->top = new Scope($this);
@@ -27,9 +29,16 @@ class Phemto {
         $this->top->call($method);
     }
 
+    function fill() {
+        $names = func_get_args();
+        return new IncomingParameters($names, $this);
+    }
+
     function create($type) {
         $this->repository = new ClassRepository();
-        return $this->top->create($type);
+        $object = $this->top->create($type);
+        $this->named_parameters = array();
+        return $object;
     }
 
     function pickFrom($candidates) {
@@ -44,12 +53,34 @@ class Phemto {
         return array();
     }
 
-    function instantiateParameter($parameter) {
+    function useParameters($parameters) {
+        $this->named_parameters = array_merge($this->named_parameters, $parameters);
+    }
+
+    function instantiateParameter($parameter, $nesting) {
+        if (isset($this->named_parameters[$parameter->getName()])) {
+            return $this->named_parameters[$parameter->getName()];
+        }
         throw new MissingDependency();
     }
 
     function repository() {
         return $this->repository;
+    }
+}
+
+class IncomingParameters {
+    private $injector;
+
+    function __construct($names, $injector) {
+        $this->names = $names;
+        $this->injector = $injector;
+    }
+
+    function with() {
+        $values = func_get_args();
+        $this->injector->useParameters(array_combine($this->names, $values));
+        return $this->injector;
     }
 }
 
@@ -110,7 +141,7 @@ class Scope {
                 return $wrapper;
             }
         }
-        return false;;
+        return false;
     }
 
     function pickFrom($candidates) {
