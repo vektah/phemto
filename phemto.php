@@ -34,6 +34,12 @@ class Phemto {
         return new IncomingParameters($names, $this);
     }
 
+    function with() {
+        $values = func_get_args();
+        $this->unnamed_parameters = array_merge($this->unnamed_parameters, $values);
+        return $this;
+    }
+
     function create($type) {
         $this->repository = new ClassRepository();
         $object = $this->top->create($type);
@@ -60,6 +66,9 @@ class Phemto {
     function instantiateParameter($parameter, $nesting) {
         if (isset($this->named_parameters[$parameter->getName()])) {
             return $this->named_parameters[$parameter->getName()];
+        }
+        if ($value = array_shift($this->unnamed_parameters)) {
+            return $value;
         }
         throw new MissingDependency();
     }

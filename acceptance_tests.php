@@ -213,7 +213,7 @@ class CanInstantiateWithNamedParameters extends UnitTestCase {
 }
 
 class CanInstantiateWithAnonymousParameters extends UnitTestCase {
-    function TODO_testCanFillMissingParametersWithExplicitValues() {
+    function testCanFillMissingParametersWithExplicitValues() {
 		$injector = new Phemto();
         $this->assertIdentical(
                 $injector->with(3, 5)->create('ClassWithParameters'),
