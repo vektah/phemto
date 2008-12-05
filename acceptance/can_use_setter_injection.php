@@ -13,7 +13,7 @@ class NeedsInitToCompleteConstruction {
 class CanUseSetterInjection extends UnitTestCase {
 	function testCanCallSettersToCompleteInitialisation() {
 		$injector = new Phemto();
-		$injector->whenCreating('NeedsInitToCompleteConstruction')->call('init');
+		$injector->forType('NeedsInitToCompleteConstruction')->call('init');
 		$expected = new NeedsInitToCompleteConstruction();
 		$expected->init(new NotWithoutMe());
 		$this->assertIdentical($injector->create('NeedsInitToCompleteConstruction'),

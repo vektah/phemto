@@ -28,8 +28,8 @@ class Phemto {
         return $this->top->whenCreating($type);
     }
 
-    function call($method) {
-        $this->top->call($method);
+    function forType($type) {
+        return $this->top->forType($type);
     }
 
     function fill() {
@@ -105,7 +105,7 @@ class Context {
     private $registry = array();
     private $variables = array();
     private $contexts = array();
-    private $setters = array();
+    private $types = array();
     private $wrappers = array();
 
     function __construct($parent) {
@@ -125,8 +125,11 @@ class Context {
         return $this->contexts[$type] = new Context($this);
     }
 
-    function call($method) {
-        array_unshift($this->setters, $method);
+    function forType($type) {
+        if (! isset($this->types[$type])) {
+            $this->types[$type] = new Type();
+        }
+        return $this->types[$type];
     }
 
     function wrapWith($type) {
@@ -172,8 +175,9 @@ class Context {
     }
 
     function settersFor($class) {
+        $setters = isset($this->types[$class]) ? $this->types[$class]->setters : array();
         return array_values(array_unique(array_merge(
-                    $this->setters, $this->parent->settersFor($class))));
+                    $setters, $this->parent->settersFor($class))));
     }
 
     function wrappersFor($type) {
@@ -235,6 +239,14 @@ class Variable {
 
     function willUse($interface) {
         $this->interface = $interface;
+    }
+}
+
+class Type {
+    public $setters = array();
+
+    function call($method) {
+        array_unshift($this->setters, $method);
     }
 }
 ?>
