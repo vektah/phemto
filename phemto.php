@@ -40,7 +40,10 @@ class Phemto {
         return $this;
     }
 
-    function create($type) {
+    function create() {
+        $values = func_get_args();
+        $type = array_shift($values);
+        $this->unnamed_parameters = array_merge($this->unnamed_parameters, $values);
         $this->repository = new ClassRepository();
         $object = $this->top->create($type);
         $this->named_parameters = array();

@@ -220,7 +220,7 @@ class CanInstantiateWithAnonymousParameters extends UnitTestCase {
                 new ClassWithParameters(3, 5));
     }
 
-    function TODO_testCanUseShorterSyntacticForm() {
+    function testCanUseShorterSyntacticForm() {
 		$injector = new Phemto();
         $this->assertIdentical(
                 $injector->create('ClassWithParameters', 3, 5),
