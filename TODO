@@ -7,7 +7,6 @@ it just illustrates the direction of the project.
 In priority order...
 --------------------
 * Write a Singleton lifecycle.
-* Can fill dependencies with explicit values
 * Add parameters to Reused lifecycle.
 * Add parameters to Singleton lifecycle.
 
