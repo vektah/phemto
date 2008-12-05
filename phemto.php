@@ -13,7 +13,7 @@ class Phemto {
     private $unnamed_parameters = array();
 
     function __construct() {
-        $this->top = new Scope($this);
+        $this->top = new Context($this);
     }
 
     function willUse($preference) {
@@ -99,12 +99,12 @@ class IncomingParameters {
     }
 }
 
-class Scope {
+class Context {
     private $parent;
     private $repository;
     private $registry = array();
     private $variables = array();
-    private $scopes = array();
+    private $contexts = array();
     private $setters = array();
     private $wrappers = array();
 
@@ -122,7 +122,7 @@ class Scope {
     }
 
     function whenCreating($type) {
-        return $this->scopes[$type] = new Scope($this);
+        return $this->contexts[$type] = new Context($this);
     }
 
     function call($method) {
@@ -135,15 +135,15 @@ class Scope {
 
     function create($type, $nesting = array()) {
         $lifecycle = $this->pickFrom($this->repository()->candidatesFor($type));
-        $scope = $this->determineScope($lifecycle->class);
-        if ($wrapper = $scope->hasWrapper($type, $nesting)) {
+        $context = $this->determineContext($lifecycle->class);
+        if ($wrapper = $context->hasWrapper($type, $nesting)) {
             return $this->create($wrapper, $this->cons($wrapper, $nesting));
         }
-        $instance = $lifecycle->instantiate($scope->createDependencies(
+        $instance = $lifecycle->instantiate($context->createDependencies(
                         $this->repository()->getConstructorParameters($lifecycle->class),
                         $this->cons($lifecycle->class, $nesting)));
-        foreach ($scope->settersFor($lifecycle->class) as $setter) {
-            $scope->invoke($instance, $setter, $scope->createDependencies(
+        foreach ($context->settersFor($lifecycle->class) as $setter) {
+            $context->invoke($instance, $setter, $context->createDependencies(
                                 $this->repository()->getParameters($lifecycle->class, $setter),
                                 $this->cons($lifecycle->class, $nesting)));
         }
@@ -190,22 +190,18 @@ class Scope {
     }
 
     function instantiateParameter($parameter, $nesting) {
-        try {
-            if ($hint = $parameter->getClass()) {
-                return $this->create($hint->getName(), $nesting);
-            }
-        } catch (Exception $e) {
-            if (isset($this->variables[$parameter->getName()])) {
-                return $this->create($this->variables[$parameter->getName()]->interface, $nesting);
-            }
+        if ($hint = $parameter->getClass()) {
+            return $this->create($hint->getName(), $nesting);
+        } elseif (isset($this->variables[$parameter->getName()])) {
+            return $this->create($this->variables[$parameter->getName()]->interface, $nesting);
         }
         return $this->parent->instantiateParameter($parameter, $nesting);
     }
 
-    private function determineScope($class) {
-        foreach ($this->scopes as $type => $scope) {
-            if ($this->repository()->inScope($class, $type)) {
-                return $scope;
+    private function determineContext($class) {
+        foreach ($this->contexts as $type => $context) {
+            if ($this->repository()->isSupertype($class, $type)) {
+                return $context;
             }
         }
         return $this;

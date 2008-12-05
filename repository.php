@@ -15,7 +15,7 @@ class ClassRepository {
                 self::$reflection->implementationsOf($interface));
     }
 
-    function inScope($class, $type) {
+    function isSupertype($class, $type) {
         $supertypes = array_merge(
                 array($class),
                 self::$reflection->interfacesOf($class),
