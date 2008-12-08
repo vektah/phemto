@@ -174,6 +174,95 @@ $controller = $injector->create('MyController');
         </section>
         <section name="phemto_instantiation" title="Creating objects with Phemto">
             <p>
+                The simplest way Phemto creates objects is straight from the class name...
+<php><![CDATA[
+class Porsche911 { }
+
+$injector = new Phemto();
+$car = $injector->create('Porsche911');
+]]></php>
+                It will search the classes currently registered by the system to
+                find a match.
+            </p>
+            <p>
+                If only one class could possibly match, then it will be instantiated
+                straight away.
+                In doing so, <em>Phemto</em> is smart enough to understand abstract
+                classes and interfaces...
+<php><![CDATA[
+abstract class Car { }
+class Porsche911 extends Car { }
+
+$injector = new Phemto();
+$car = $injector->create('Car');
+]]></php>
+                Here <code>$car</code> is an instance of <code>Porsche911</code>.
+                Similarily...
+<php><![CDATA[
+interface Transport { }
+class Porsche911 implements Transport { }
+
+$injector = new Phemto();
+$car = $injector->create('Transport');
+]]></php>
+                Again, the concrete <code>Porsche911</code> is created, as it's the
+                only option.
+            </p>
+            <p>
+                If there is ambiguity, then <em>Phemto</em> will throw an exception.
+                The ambiguity can be resolved by giving Phemto additional wiring...
+<php><![CDATA[
+interface Transport { }
+class Porsche911 implements Transport { }
+class RouteMaster implements Transport { }
+
+$injector = new Phemto();
+$injector->willUse('Porsche911');
+$car = $injector->create('Transport');
+]]></php>
+                This is handy if there is a default implementation that you now want
+                to override, but the original is still in scope.
+            </p>
+            <p>
+                <em>Phemto</em> has two methods to automatically instantiate parameters.
+                The first is by type hints...
+<php><![CDATA[
+interface Engine { }
+
+class Porsche911 {
+    function __construct(Engine $engine) { }
+}
+
+class Flat6 implements Engine { }
+
+$injector = new Phemto();
+$car = $injector->create('Porsche911');
+]]></php>
+                This is equivalent to <code>new Porsche911(new Flat6())</code>.
+                This technique is useful for framework authors, who only have to expose
+                interface names.
+            </p>
+            <p>
+                Notice that we have not had to change the client code, even though
+                we've changed the constructor signature.
+            </p>
+            <p>
+                The other way <em>Phemto</em> can fill parameters is by variable name...
+<php><![CDATA[
+class Porsche911 {
+    function __construct($engine) { }
+}
+
+interface Engine { }
+class Flat6 implements Engine { }
+
+$injector = new Phemto();
+$injector->forVariable('engine')->willUse('Engine');
+$car = $injector->create('Porsche911');
+]]></php>
+                Again we instantiate <code>$car</code> to <code>new Porsche911(new Flat6())</code>.
+                Here we've chosen the variable <code>$engine</code> to map to an interface.
+                Phemto can apply it's automation rules from there.
             </p>
         </section>
         <section name="phemto_solutions" title="Solving dependency issues with Phemto">
