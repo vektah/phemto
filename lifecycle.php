@@ -2,9 +2,9 @@
 abstract class Lifecycle {
     public $class;
 
-	function __construct($class) {
-		$this->class = $class;
-	}
+    function __construct($class) {
+        $this->class = $class;
+    }
 
     function isOneOf($candidates) {
         return in_array($this->class, $candidates);
@@ -14,24 +14,24 @@ abstract class Lifecycle {
 }
 
 class Factory extends Lifecycle {
-	function instantiate($dependencies) {
-		return call_user_func_array(
-				array(new ReflectionClass($this->class), 'newInstance'),
-				$dependencies);
-	}
+    function instantiate($dependencies) {
+        return call_user_func_array(
+                array(new ReflectionClass($this->class), 'newInstance'),
+                $dependencies);
+    }
 }
 
 class Reused extends Lifecycle {
     private $instance;
 
-	function instantiate($dependencies) {
+    function instantiate($dependencies) {
         if (! isset($this->instance)) {
             $this->instance = call_user_func_array(
                     array(new ReflectionClass($this->class), 'newInstance'),
                     $dependencies);
         }
         return $this->instance;
-	}
+    }
 }
 
 class Sessionable extends Lifecycle {
@@ -42,13 +42,13 @@ class Sessionable extends Lifecycle {
         parent::__construct($class);
     }
 
-	function instantiate($dependencies) {
+    function instantiate($dependencies) {
         if (! isset($_SESSION[$this->slot])) {
             $_SESSION[$this->slot] = call_user_func_array(
                     array(new ReflectionClass($this->class), 'newInstance'),
                     $dependencies);
         }
         return $_SESSION[$this->slot];
-	}
+    }
 }
 ?>
