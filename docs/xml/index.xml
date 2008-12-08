@@ -2,7 +2,7 @@
 <page title="Five minute guide to Phemto" here="Phemto guide">
     <long_title>Dependency injection for PHP : The five minute guide to Phemto</long_title>
     <context>
-        <section name="what-is-phemto" title="The five minute guide to Dependency Injection">
+        <section name="what_is_phemto" title="The five minute guide to Dependency Injection">
             <p>
                 In jargon speak, <em>Phemto</em> is a lightweight, highly automated,
                 dependency injection container.
@@ -110,6 +110,7 @@ $controller = new MyController($services);
                 needs to know how to create the <code>MysqlConnection</code>.
                 This can be handled by registering factories or with clever reflection tricks,
                 although passing parameters can become fiddly.
+                At least lifecycles are now under the control of the application programmer.
             </p>
             <p>
                 Unfortunately this near panacea shares a problem with the <em>Registry</em>.
@@ -137,14 +138,13 @@ class MyController {
     }
 }
 ]]></php>
-                At first sight this looks terrible, as now every script has to know the
-                dependencies.
+                At first sight this looks terrible, as now every top level script has to
+                know the dependencies.
                 Changing the database connection will now have to be done in hundreds of
                 places.
                 Well, that would be true if we had to use <code>new</code>...
 <php><![CDATA[
 $injector = new Phemto();
-$injector->willUse('MysqlConnection');
 $controller = $injector->create('MyController');
 ]]></php>
                 Now the controller specifies only an interface, and
@@ -155,8 +155,29 @@ $controller = $injector->create('MyController');
                 This is &quot;Inversion of Control&quot;.
             </p>
             <p>
-                Fortunately, <code>Phemto</code> is specialised to discovering how
-                to create classes, and automates a surprising amount of configuration.
+                Fortunately, <code>Phemto</code> is specialised in discovering how
+                to create classes, and automates a surprising amount.
+                Just from the interface hint, it can deduce the class that fits the bill.
+            </p>
+        </section>
+        <section name="installing_phemto" title="Installing Phemto">
+            <p>
+                The phemto download is a pure PHP tarball.
+                Simply untar it...
+                <sh>tar -zxf phemto_0.1_alpha3.tar.gz</sh>
+                You can then <code>require_once()</code> the <em>phemto.php</em> file
+                directly, or place the phemto folder in your path.
+            </p>
+            <p>
+                Phemto's only dependency is on the PHP reflection API.
+            </p>
+        </section>
+        <section name="phemto_instantiation" title="Creating objects with Phemto">
+            <p>
+            </p>
+        </section>
+        <section name="phemto_solutions" title="Solving dependency issues with Phemto">
+            <p>
             </p>
         </section>
     </context>
