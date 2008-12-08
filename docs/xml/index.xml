@@ -1,21 +1,23 @@
 <?xml version="1.0"?>
-<page title="One minute guide to Phemto" here="Phemto guide">
-    <long_title>Dependency injection for PHP : The one minute guide to Phemto</long_title>
+<page title="Five minute guide to Phemto" here="Phemto guide">
+    <long_title>Dependency injection for PHP : The five minute guide to Phemto</long_title>
     <context>
-        <section name="what-is-phemto" title="What is Phemto?">
+        <section name="what-is-phemto" title="The five minute guide to Dependency Injection">
             <p>
                 In jargon speak, <em>Phemto</em> is a lightweight, highly automated,
                 dependency injection container.
-                In simpler terms, <em>Phemto</em>'s job is to create objects from as
+                In simpler terms, <em>Phemto</em>'s job is to instantiate objects from as
                 little information as possible; dramatically reducing coupling within
                 an application or framework.
             </p>
             <p>
                 Why is this useful?
-                Creating objects in your application with hard code <code>new</code>
-                statements is very explicit, but it makes things difficult to change later.
+                The easiest way to understand is to think of &quot;Dependency Injection&quot;
+                is as part of a scale with hard coding at the other end.
             </p>
             <p>
+                Creating objects in your application with hard code <code>new</code>
+                statements is very explicit, but it makes things difficult to change later.
                 Take this code...
 <php><![CDATA[
 class MyController {
@@ -25,8 +27,136 @@ class MyController {
     }
 }
 ]]></php>
-                Easy to understand, but you can only ever use a MySQL database in this
-                application.
+                Here <code>MyController</code> has a dependency on <code>MysqlConnection</code>.
+            </p>
+            <p>
+                The <code>new</code> operator is easy to understand, but <code>MyController</code>
+                can only ever use a MySQL database.
+                Recoding it to allow subclassing hardly helps, because that will expose other
+                parts of the implementation that will tie you in.
+                Anyway, multiple dependencies will defeat inheritance by causing a class explosion.
+                You can only play the inheritance card once.
+            </p>
+            <p>
+                The next step up is to use a factory...
+<php><![CDATA[
+class MyController {
+    function __construct($connection_pool) {
+        ...
+        $connection = $connection_pool->getConnection();
+    }
+}
+]]></php>
+                This is a very effective solution.
+                The factory can be set to a certain connection type, either explicitely
+                or by using a configuration file.
+                Factories often create whole families of objects, when they are known as
+                <em>Abstract Factory</em> or <em>Repository</em>.
+                There are limitations though.
+            </p>
+            <p>
+                Factories can introduce a lot of extra code.
+                If you want to unit test the classes with mock objects, you will need to
+                mock not just the dependency, but the factory as well.
+                That's quite a bit of test clutter.
+            </p>
+            <p>
+                Even in live code, if you want to create an object the factory author
+                has not thought of, then you have to subclass or rewrite the factory.
+                For frameworks this is a big problem.
+            </p>
+            <p>
+                Another way is to take construction out of the client objects altogether,
+                doing the whole lot up front...
+<php><![CDATA[
+class MyController {
+    function __construct($registry) {
+        ...
+        $connection = $registry->connection;
+    }
+}
+...
+$registry = new Registry();
+$registry->connection = new MysqlConnection();
+$controller = new MyController($registry);
+]]></php>
+                The <code>Registry</code> is pretty passive, and so the application now has
+                to get involved in creating, or overriding, lot's of objects.
+                You may also end up instantiating objects that don't get used.
+                This pattern is not enough if you want to use lazy object creation, or
+                <em>Singleton</em>s, or some other object lifecycle.
+            </p>
+            <p>
+                Worse, if a dependency has other dependencies that need to be handled
+                with the <em>Registry</em>, the setting up can get very tangled.
+            </p>
+            <p>
+                We can make the <em>Registry</em> pattern more sophisticated it if we
+                allow it to instantiate objects.
+                It then becomes a <em>Service Locator</em>...
+<php><![CDATA[
+class MyController {
+    function __construct($services) {
+        ...
+        $connection = $services->connection;
+    }
+}
+...
+$services = new ServiceLocator();
+$services->connection('MysqlConnection');
+$controller = new MyController($services);
+]]></php>
+                Now the wiring can be set in any order, but the <code>ServiceLocator</code>
+                needs to know how to create the <code>MysqlConnection</code>.
+                This can be handled by registering factories or with clever reflection tricks,
+                although passing parameters can become fiddly.
+            </p>
+            <p>
+                Unfortunately this near panacea shares a problem with the <em>Registry</em>.
+                Every class that uses an interface this way has to have the
+                <code>ServiceLocator</code> as a dependency, which is intrusive.
+                If you try to mix two systems with different <em>Service Locator</em>s, you
+                are out of luck.
+            </p>
+            <p>
+                <em>Dependency Injection</em> starts from a different track.
+                Let's go back to our first example...
+<php><![CDATA[
+class MyController {
+    function __construct() {
+        ...
+        $connection = new MysqlConnection();
+    }
+}
+]]></php>
+                ...and make the dependency external...
+<php><![CDATA[
+class MyController {
+    function __construct(Connection $connection) {
+        ...
+    }
+}
+]]></php>
+                At first sight this looks terrible, as now every script has to know the
+                dependencies.
+                Changing the database connection will now have to be done in hundreds of
+                places.
+                Well, that would be true if we had to use <code>new</code>...
+<php><![CDATA[
+$injector = new Phemto();
+$injector->willUse('MysqlConnection');
+$controller = $injector->create('MyController');
+]]></php>
+                Now the controller specifies only an interface, and
+                the job of instantiation has been handed to an intermediary.
+                The <code>MyController</code> is no longer needs to know about the
+                <code>MysqlConnection</code>.
+                Instead the <code>$injector</code> has to know about both.
+                This is &quot;Inversion of Control&quot;.
+            </p>
+            <p>
+                Fortunately, <code>Phemto</code> is specialised to discovering how
+                to create classes, and automates a surprising amount of configuration.
             </p>
         </section>
     </context>
