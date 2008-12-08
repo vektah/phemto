@@ -264,9 +264,52 @@ $car = $injector->create('Porsche911');
                 Here we've chosen the variable <code>$engine</code> to map to an interface.
                 Phemto can apply it's automation rules from there.
             </p>
-        </section>
-        <section name="phemto_solutions" title="Solving dependency issues with Phemto">
             <p>
+                <em>Phemto</em> can call methods other than the constructor...
+<php><![CDATA[
+interface Seat { }
+interface SportsCar { }
+
+class Porsche911 implements SportsCar {
+    function fitDriversSeat(Seat $seat) { }
+}
+
+class BucketSeat implements Seat { }
+
+$injector = new Phemto();
+$injector->forType('SportsCar')->call('fitDriversSeat');
+$car = $injector->create('Porsche911');
+]]></php>
+                This code is the same as...
+<php><![CDATA[
+$car = new Porsche911();
+$car->fitDriversSeat(new BucketSeat());
+]]></php>
+
+            </p>
+            <p>
+                You don't always want to create the same object.
+                Sometimes the choice depends on context.
+<php><![CDATA[
+interface Seat { }
+
+class Car {
+    function __construct(Seat $seat) { }
+}
+class FordEscort extends Car;
+class Porsche911 extends Car;
+
+class StandardSeat implements Seat { }
+class BucketSeat implements Seat { }
+
+$injector = new Phemto();
+$injector->willUse('StandardSeat');
+$injector->whenCreating('Porsche911')->willUse('BucketSeat');
+$car = $injector->create('Porsche911');
+]]></php>
+                This ensures that the default <code>$seat</code> is the
+                <code>StandardSeat</code> class, but that the <code>Porsche911</code>
+                will use the <code>BucketSeat</code>.
             </p>
         </section>
     </context>
