@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<page title="One minute guide to Phemto" here="Phemto guide">
+    <long_title>Dependency injection for PHP : The one minute guide to Phemto</long_title>
+    <context>
+        <section name="what-is-phemto" title="What is Phemto?">
+            <p>
+                In jargon speak, <em>Phemto</em> is a lightweight, highly automated,
+                dependency injection container.
+                In simpler terms, <em>Phemto</em>'s job is to create objects from as
+                little information as possible; dramatically reducing coupling within
+                an application or framework.
+            </p>
+            <p>
+                Why is this useful?
+                Creating objects in your application with hard code <code>new</code>
+                statements is very explicit, but it makes things difficult to change later.
+            </p>
+            <p>
+                Take this code...
+<php><![CDATA[
+class MyController {
+    function __construct() {
+        ...
+        $connection = new MysqlConnection();
+    }
+}
+]]></php>
+                Easy to understand, but you can only ever use a MySQL database in this
+                application.
+            </p>
+        </section>
+    </context>
+</page>
