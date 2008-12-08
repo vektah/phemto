@@ -6,19 +6,19 @@ class NeededForFirst { }
 class NeededForSecond { }
 
 class VariablesInConstructor {
-	function __construct($first, $second) {
-		$this->args = array($first, $second);
-	}
+    function __construct($first, $second) {
+        $this->args = array($first, $second);
+    }
 }
 
 class CanInjectDependenciesByVariableName extends UnitTestCase {
-	function testExplicitlyNamedVariables() {
-		$injector = new Phemto();
-		$injector->forVariable('first')->willUse('NeededForFirst');
-		$injector->forVariable('second')->willUse('NeededForSecond');
-		$this->assertEqual(
-				$injector->create('VariablesInConstructor'),
-				new VariablesInConstructor(new NeededForFirst(), new NeededForSecond()));
-	}
+    function testExplicitlyNamedVariables() {
+        $injector = new Phemto();
+        $injector->forVariable('first')->willUse('NeededForFirst');
+        $injector->forVariable('second')->willUse('NeededForSecond');
+        $this->assertEqual(
+                $injector->create('VariablesInConstructor'),
+                new VariablesInConstructor(new NeededForFirst(), new NeededForSecond()));
+    }
 }
 ?>

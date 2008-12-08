@@ -12,21 +12,21 @@ class ConcreteSubclass extends AbstractClass { }
 class CanAutomaticallyInstantiateKnownClasses extends UnitTestCase {
 
     function testNamedClassInstantiatedAutomatically() {
-		$injector = new Phemto();
-		$this->assertIsA($injector->create('LoneClass'), 'LoneClass');
-	}
+        $injector = new Phemto();
+        $this->assertIsA($injector->create('LoneClass'), 'LoneClass');
+    }
 
     function testWillUseOnlySubclassIfParentIsAbstract() {
-		$injector = new Phemto();
-		$this->assertIsA($injector->create('AbstractClass'),
-						 'ConcreteSubclass');
+        $injector = new Phemto();
+        $this->assertIsA($injector->create('AbstractClass'),
+                         'ConcreteSubclass');
     }
 
     function testCanBeConfiguredToPreferSpecificSubclass() {
-		$injector = new Phemto();
-		$injector->willUse('SecondSubclass');
-		$this->assertIsA($injector->create('ClassWithManySubclasses'),
-						 'SecondSubclass');
-	}
+        $injector = new Phemto();
+        $injector->willUse('SecondSubclass');
+        $this->assertIsA($injector->create('ClassWithManySubclasses'),
+                         'SecondSubclass');
+    }
 }
 ?>

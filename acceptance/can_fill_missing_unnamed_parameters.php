@@ -8,14 +8,14 @@ class ClassWithAnyOldParameters {
 
 class CanInstantiateWithAnonymousParameters extends UnitTestCase {
     function testCanFillMissingParametersWithExplicitValues() {
-		$injector = new Phemto();
+        $injector = new Phemto();
         $this->assertIdentical(
                 $injector->with(3, 5)->create('ClassWithAnyOldParameters'),
                 new ClassWithAnyOldParameters(3, 5));
     }
 
     function testCanUseShorterSyntacticForm() {
-		$injector = new Phemto();
+        $injector = new Phemto();
         $this->assertIdentical(
                 $injector->create('ClassWithAnyOldParameters', 3, 5),
                 new ClassWithAnyOldParameters(3, 5));

@@ -8,7 +8,7 @@ class ClassWithParameters {
 
 class CanInstantiateWithNamedParameters extends UnitTestCase {
     function testCanFillMissingParametersWithExplicitValues() {
-		$injector = new Phemto();
+        $injector = new Phemto();
         $this->assertIdentical(
                 $injector->fill('a', 'b')->with(3, 5)->create('ClassWithParameters'),
                 new ClassWithParameters(3, 5));

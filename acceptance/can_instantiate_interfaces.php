@@ -11,28 +11,28 @@ class SecondImplementation implements InterfaceWithManyImplementations { }
 class CanAutomaticallyInstantiateKnownInterfaces extends UnitTestCase {
 
     function testInterfaceWithOnlyOneCandidateIsInstantiatedAutomatically() {
-		$injector = new Phemto();
-		$this->assertIsA($injector->create('InterfaceWithOneImplementation'),
-						 'OnlyImplementation');
-	}
+        $injector = new Phemto();
+        $this->assertIsA($injector->create('InterfaceWithOneImplementation'),
+                         'OnlyImplementation');
+    }
 
     function testWillThrowForUnknownClass() {
-		$injector = new Phemto();
-		$this->expectException('CannotFindImplementation');
-		$injector->create('NonExistent');
-	}
+        $injector = new Phemto();
+        $this->expectException('CannotFindImplementation');
+        $injector->create('NonExistent');
+    }
 
-	function testWillThrowIfInterfaceUnspecified() {
-		$injector = new Phemto();
-		$this->expectException('CannotDetermineImplementation');
-		$injector->create('InterfaceWithManyImplementations');
-	}
+    function testWillThrowIfInterfaceUnspecified() {
+        $injector = new Phemto();
+        $this->expectException('CannotDetermineImplementation');
+        $injector->create('InterfaceWithManyImplementations');
+    }
 
     function testCanBeConfiguredToPreferSpecificImplementation() {
-		$injector = new Phemto();
-		$injector->willUse('SecondImplementation');
-		$this->assertIsA($injector->create('InterfaceWithManyImplementations'),
-						 'SecondImplementation');
-	}
+        $injector = new Phemto();
+        $injector->willUse('SecondImplementation');
+        $this->assertIsA($injector->create('InterfaceWithManyImplementations'),
+                         'SecondImplementation');
+    }
 }
 ?>

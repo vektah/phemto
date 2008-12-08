@@ -15,25 +15,25 @@ class ClassWithSpecial implements SpecialInterface {
 }
 
 class CanUseDifferentDependencySetWithinAnInterface extends UnitTestCase {
-	function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
-		$injector = new Phemto();
-		$injector->whenCreating('ClassWithSpecial')->willUse('SpecialImplementation');
-		$injector->willUse('UsualImplementation');
-		$this->assertEqual(
-				$injector->create('ClassWithUsual'),
-				new ClassWithUsual(new UsualImplementation()));
-		$this->assertEqual(
-				$injector->create('ClassWithSpecial'),
-				new ClassWithSpecial(new SpecialImplementation()));
-	}
+    function testCanOverridePreferenceWhenInstantiatingSpecificInstance() {
+        $injector = new Phemto();
+        $injector->whenCreating('ClassWithSpecial')->willUse('SpecialImplementation');
+        $injector->willUse('UsualImplementation');
+        $this->assertEqual(
+                $injector->create('ClassWithUsual'),
+                new ClassWithUsual(new UsualImplementation()));
+        $this->assertEqual(
+                $injector->create('ClassWithSpecial'),
+                new ClassWithSpecial(new SpecialImplementation()));
+    }
 
-	function testCanOverridePreferenceWhenInstantiatingFromAnInterface() {
-		$injector = new Phemto();
-		$injector->whenCreating('SpecialInterface')->willUse('SpecialImplementation');
-		$injector->willUse('UsualImplementation');
-		$this->assertEqual(
-				$injector->create('SpecialInterface'),
-				new ClassWithSpecial(new SpecialImplementation()));
-	}
+    function testCanOverridePreferenceWhenInstantiatingFromAnInterface() {
+        $injector = new Phemto();
+        $injector->whenCreating('SpecialInterface')->willUse('SpecialImplementation');
+        $injector->willUse('UsualImplementation');
+        $this->assertEqual(
+                $injector->create('SpecialInterface'),
+                new ClassWithSpecial(new SpecialImplementation()));
+    }
 }
 ?>

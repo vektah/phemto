@@ -7,36 +7,36 @@ interface Hinted { }
 class NeededForConstructor { }
 
 class HintedConstructor implements Hinted {
-	function __construct(NeededForConstructor $one) {
-		$this->one = $one;
-	}
+    function __construct(NeededForConstructor $one) {
+        $this->one = $one;
+    }
 }
 
 class HintedConstructorWithDependencyChoice implements Hinted {
-	function __construct(InterfaceWithManyImplementations $alternate) {
-		$this->alternate = $alternate;
-	}
+    function __construct(InterfaceWithManyImplementations $alternate) {
+        $this->alternate = $alternate;
+    }
 }
 
 class RepeatedHintConstructor {
-	function __construct(NeededForConstructor $first, NeededForConstructor $second) {
-		$this->args = array($first, $second);
-	}
+    function __construct(NeededForConstructor $first, NeededForConstructor $second) {
+        $this->args = array($first, $second);
+    }
 }
 
 class CanAutomaticallyInjectTypeHintedDependencies extends UnitTestCase {
-	function testSimpleDependenciesAreFulfilledAutomatically() {
-		$injector = new Phemto();
-		$this->assertIdentical($injector->create('HintedConstructor'),
-							   new HintedConstructor(new NeededForConstructor()));
-	}
+    function testSimpleDependenciesAreFulfilledAutomatically() {
+        $injector = new Phemto();
+        $this->assertIdentical($injector->create('HintedConstructor'),
+                               new HintedConstructor(new NeededForConstructor()));
+    }
 
-	function testRepeatedHintJustGetsTwoSeparateInstances() {
-		$injector = new Phemto();
-		$injector->willUse('SecondImplementation');
-		$this->assertEqual(
-				$injector->create('RepeatedHintConstructor'),
-				new RepeatedHintConstructor(new NeededForConstructor(), new NeededForConstructor()));
-	}
+    function testRepeatedHintJustGetsTwoSeparateInstances() {
+        $injector = new Phemto();
+        $injector->willUse('SecondImplementation');
+        $this->assertEqual(
+                $injector->create('RepeatedHintConstructor'),
+                new RepeatedHintConstructor(new NeededForConstructor(), new NeededForConstructor()));
+    }
 }
 ?>
