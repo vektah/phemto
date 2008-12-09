@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<page title="Five minute guide to Phemto" here="Phemto guide">
+<page title="Five minute guide to Phemto" here="phemto">
     <long_title>Dependency injection for PHP : The five minute guide to Phemto</long_title>
-    <context>
+    <content>
         <section name="what_is_phemto" title="The five minute guide to Dependency Injection">
             <p>
                 In jargon speak, <em>Phemto</em> is a lightweight, highly automated,
@@ -172,7 +172,124 @@ $controller = $injector->create('MyController');
                 Phemto's only dependency is on the PHP reflection API.
             </p>
         </section>
-        <section name="phemto_instantiation" title="Creating objects with Phemto">
+        <section name="using_phemto" title="Using Phemto">
+            <p>
+                The expected use case for Phemto is in the top level of an application
+                or framework.
+            </p>
+            <p>
+                Firstly you write your classes as normal...
+<php><![CDATA[
+class Permissions { ... }
+
+class Authentication {
+    function __construct($permissions) { ... }
+}
+
+class MyPage implements Page {
+    function __construct($authentication) { ... }
+}
+]]></php>
+                This is a simple <em>Page controller</em> architecture.
+                We can unit test <code>Page</code> fairly easily, because it's
+                <code>Authentication</code> dependency is passed in the constructor.
+                We can use a mock version for testing, and just concentrate on the
+                page logic.
+            </p>
+            <p>
+                Next we create an application wiring file, let's call it
+                &quot;wiring.php&quot;, that includes all the configuration for
+                this application...
+<php><![CDATA[
+<?php
+require_once('phemto/phemto.php');
+
+$injector = new Phemto();
+$injector->forVariable('authentication')->willUse('Authentication');
+$injector->whenCreating('Authentication')
+         ->forVariable('permissions')->willUse(new Sessionable('Permissions'));
+return $injector;
+?>
+]]></php>
+                Here we tell the dependency injector that whenever we see the variable
+                <code>$authentication</code> we want to create an instance of
+                <code>Authentication</code>.
+                The <code>$permissions</code> object has a different lifecycle though.
+                <code>Sessionable</code> says that if possible it will be read from the session,
+                otherwise it will be created just once.
+                More on the wiring syntax and lifecycles in the next section.
+            </p>
+            <p>
+                Our top level scripts now swap their <code>new</code> statements
+                for <em>Phemto</em> factory calls...
+<php><![CDATA[
+<?php
+require_once('lib/my_page.php');
+
+$injector = include('wiring.php');
+$page = $injector->create('Page');
+?>
+<html>...</html>
+]]></php>
+                So isolated is our code from the top level scripts, that we can
+                add and remove dependencies to the underlying classes without ever
+                again having to alter our top level scripts.
+            </p>
+            <p>
+                Framework authors have different concerns.
+                As they probably already have a central point for creating pages, their
+                main concern is with adapting to your components.
+            </p>
+            <p>
+                Suppose we want write an <code>Authentication</code> implementation
+                based on an interface supplied by the framework...
+<php><![CDATA[
+interface Authentication { ... }
+
+class InternalFrontControllerActionChainThingy {
+    function __construct(Authentication $authentication, ...) { ... }
+}
+]]></php>
+                Our component wants to use the same database connection
+                as the framework, but we also want to add a third party caching component.
+<php><![CDATA[
+require_once('cache.php');
+
+class OurAuthentication implements Authentication {
+    function __construct(Database $database, DatabaseCache $cache) { ... }
+}
+]]></php>
+                For a factory based framework this is a bit of a nightmare, as the
+                framework will not know how to create the caching component or where to
+                put it.
+                If the framework is using <em>Dependency Injection</em>, then this is just
+                an amendment to the wiring.
+            </p>
+            <p>
+                This wiring could be amended directly, with a user supplied wiring file...
+<php><![CDATA[
+$injector = include('framework/wiring.php');
+$injector->willUse('OurAuthenticator');
+return $injector;
+]]></php>
+                More likely the framework will wrap the DI tool within it's own registration
+                system...
+<php><![CDATA[
+class FrameworkRegistration {
+    ...
+    function register($class, $dependencies = array()) {
+        $this->injector->whenCreating('Controller')->willUse($class);
+        foreach (dependencies as $dependency) {
+            $this->injector->whenCreating('Controller')
+                           ->whenCreating($class)
+                           ->willUse($dependency);
+        }
+    }
+}
+]]></php>
+            </p>
+        </section>
+        <section name="wiring" title="Wiring with Phemto">
             <p>
                 The simplest way Phemto creates objects is straight from the class name...
 <php><![CDATA[
@@ -265,6 +382,35 @@ $car = $injector->create('Porsche911');
                 Phemto can apply it's automation rules from there.
             </p>
             <p>
+                Sometimes instance specific parameters need to be passed.
+                The simplest way to do this is just add them to the create method...
+<php><![CDATA[
+class Porsche911 {
+    function __construct($fluffy_dice, $nodding_dog) { }
+}
+
+$injector = new Phemto();
+$car = $injector->create('Porsche911', true, false);
+]]></php>
+                These parameters will fill unfulfilled slots in the constructors, here
+                giving <code>new Porsche911(true, false)</code>.
+            </p>
+            <p>
+                As unnamed parameters can be a bit error prone when things get complicated,
+                there is a named parameter option as well...
+<php><![CDATA[
+class Porsche911 {
+    function __construct($fluffy_dice, $nodding_dog) { }
+}
+
+$injector = new Phemto();
+$car = $injector->fill('fluffy_dice', 'nodding_dog')
+                ->with(true, false)
+                ->create('Porsche911', true);
+]]></php>
+                These parameters apply to dependencies as well.
+            </p>
+            <p>
                 <em>Phemto</em> can call methods other than the constructor...
 <php><![CDATA[
 interface Seat { }
@@ -285,11 +431,11 @@ $car = $injector->create('Porsche911');
 $car = new Porsche911();
 $car->fitDriversSeat(new BucketSeat());
 ]]></php>
-
+                Calling non-constructor methods in this way is called setter injection.
             </p>
             <p>
                 You don't always want to create the same object.
-                Sometimes the choice depends on context.
+                Sometimes the choice depends on context...
 <php><![CDATA[
 interface Seat { }
 
@@ -311,6 +457,68 @@ $car = $injector->create('Porsche911');
                 <code>StandardSeat</code> class, but that the <code>Porsche911</code>
                 will use the <code>BucketSeat</code>.
             </p>
+            <p>
+                The <code>whenCreating()</code> method creates a whole new nested
+                version of <em>Phemto</em> so that context can be applied to all
+                of the preceding wiring methods. E.g...
+<php><![CDATA[
+class Car {
+    function __construct($seat) { }
+}
+class FordEscort extends Car;
+class Porsche911 extends Car;
+
+class StandardSeat { }
+class BucketSeat { }
+
+$injector = new Phemto();
+$injector->willUse('StandardSeat');
+$injector->whenCreating('Porsche911')->forVariable('seat')->willUse('BucketSeat');
+$car = $injector->create('Porsche911');
+]]></php>
+            </p>
         </section>
-    </context>
+    </content>
+    <internal>
+        <link>
+            <a href="#what_is_phemto">What is Phemto?</a>
+        </link>
+        <link>
+            <a href="#installing_phemto">Installation</a> from the tarball.
+        </link>
+        <link>
+            <a href="#using_phemto">Using Phemto</a> in your application.
+        </link>
+        <link>
+            The <a href="#wiring">wiring syntax</a>.
+        </link>
+    </internal>
+    <external>
+        <link>
+            Phemto project page on <a href="http://sourceforge.net/projects/phemto/">SourceForge</a>.
+        </link>
+        <link>
+            Martin Fowler's <a href="http://martinfowler.com/articles/injection.html">description of DI</a>.
+        </link>
+    </external>
+    <meta>
+        <keywords>
+            dependency injection,
+            dependency injection pattern,
+            dependency injection container,
+            php dependency injection,
+            php,
+            di,
+            object lifecycle,
+            singleton pattern,
+            registry pattern,
+            service locator pattern,
+            inversion of control,
+            interfaces,
+            mock object,
+            mock objects,
+            unit testing,
+            framework
+        </keywords>
+    </meta>
 </page>
