@@ -23,7 +23,7 @@
 class MyController {
     function __construct() {
         ...
-        $connection = new MysqlConnection();
+        $connection = <strong>new MysqlConnection()</strong>;
     }
 }
 ]]></php>
@@ -41,7 +41,7 @@ class MyController {
                 The next step up is to use a factory...
 <php><![CDATA[
 class MyController {
-    function __construct($connection_pool) {
+    function __construct(<strong>$connection_pool</strong>) {
         ...
         $connection = $connection_pool->getConnection();
     }
@@ -70,7 +70,7 @@ class MyController {
                 doing the whole lot up front...
 <php><![CDATA[
 class MyController {
-    function __construct($registry) {
+    function __construct(<strong>$registry</strong>) {
         ...
         $connection = $registry->connection;
     }
@@ -78,7 +78,8 @@ class MyController {
 ...
 $registry = new Registry();
 $registry->connection = new MysqlConnection();
-$controller = new MyController($registry);
+...
+$controller = new MyController(<strong>$registry</strong>);
 ]]></php>
                 The <code>Registry</code> is pretty passive, and so the application now has
                 to get involved in creating, or overriding, lot's of objects.
@@ -96,7 +97,7 @@ $controller = new MyController($registry);
                 It then becomes a <em>Service Locator</em>...
 <php><![CDATA[
 class MyController {
-    function __construct($services) {
+    function __construct(<strong>$services</strong>) {
         ...
         $connection = $services->connection;
     }
@@ -104,7 +105,8 @@ class MyController {
 ...
 $services = new ServiceLocator();
 $services->connection('MysqlConnection');
-$controller = new MyController($services);
+...
+$controller = new MyController(<strong>$services</strong>);
 ]]></php>
                 Now the wiring can be set in any order, but the <code>ServiceLocator</code>
                 needs to know how to create the <code>MysqlConnection</code>.
@@ -133,7 +135,7 @@ class MyController {
                 ...and make the dependency external...
 <php><![CDATA[
 class MyController {
-    function __construct(Connection $connection) {
+    function __construct(<strong>Connection $connection</strong>) {
         ...
     }
 }
@@ -143,9 +145,9 @@ class MyController {
                 Changing the database connection will now have to be done in hundreds of
                 places.
                 Well, that would be true if we had to use <code>new</code>...
-<php><![CDATA[
+<php><![CDATA[<strong>
 $injector = new Phemto();
-$controller = $injector->create('MyController');
+$controller = $injector->create('MyController');</strong>
 ]]></php>
                 Now the controller specifies only an interface, and
                 the job of instantiation has been handed to an intermediary.
@@ -205,9 +207,9 @@ class MyPage implements Page {
 require_once('phemto/phemto.php');
 
 $injector = new Phemto();
-$injector->forVariable('authentication')->willUse('Authentication');
-$injector->whenCreating('Authentication')
-         ->forVariable('permissions')->willUse(new Sessionable('Permissions'));
+$injector->forVariable('authentication')-><strong>willUse</strong>('Authentication');
+$injector-><strong>whenCreating</strong>('Authentication')
+         ->forVariable('permissions')->willUse(new <strong>Sessionable</strong>('Permissions'));
 return $injector;
 ?>
 ]]></php>
@@ -268,7 +270,7 @@ class OurAuthentication implements Authentication {
             <p>
                 This wiring could be amended directly, with a user supplied wiring file...
 <php><![CDATA[
-$injector = include('framework/wiring.php');
+$injector = <strong>include('framework/wiring.php')</strong>;
 $injector->willUse('OurAuthenticator');
 return $injector;
 ]]></php>
@@ -277,7 +279,7 @@ return $injector;
 <php><![CDATA[
 class FrameworkRegistration {
     ...
-    function register($class, $dependencies = array()) {
+    static function <strong>register($class, $dependencies = array())</strong> {
         $this->injector->whenCreating('Controller')->willUse($class);
         foreach (dependencies as $dependency) {
             $this->injector->whenCreating('Controller')
@@ -286,6 +288,10 @@ class FrameworkRegistration {
         }
     }
 }
+]]></php>
+                We could then call it with...
+<php><![CDATA[
+FrameworkRegistration::<strong>register('OurAuthentication', array('DatabaseCache'))</strong>;
 ]]></php>
             </p>
         </section>
@@ -296,7 +302,7 @@ class FrameworkRegistration {
 class Porsche911 { }
 
 $injector = new Phemto();
-$car = $injector->create('Porsche911');
+$car = <strong>$injector->create('Porsche911')</strong>;
 ]]></php>
                 It will search the classes currently registered by the system to
                 find a match.
@@ -307,7 +313,7 @@ $car = $injector->create('Porsche911');
                 In doing so, <em>Phemto</em> is smart enough to understand abstract
                 classes and interfaces...
 <php><![CDATA[
-abstract class Car { }
+<strong>abstract</strong> class Car { }
 class Porsche911 extends Car { }
 
 $injector = new Phemto();
@@ -316,7 +322,7 @@ $car = $injector->create('Car');
                 Here <code>$car</code> is an instance of <code>Porsche911</code>.
                 Similarily...
 <php><![CDATA[
-interface Transport { }
+<strong>interface</strong> Transport { }
 class Porsche911 implements Transport { }
 
 $injector = new Phemto();
@@ -334,7 +340,7 @@ class Porsche911 implements Transport { }
 class RouteMaster implements Transport { }
 
 $injector = new Phemto();
-$injector->willUse('Porsche911');
+$injector-><strong>willUse('Porsche911')</strong>;
 $car = $injector->create('Transport');
 ]]></php>
                 This is handy if there is a default implementation that you now want
@@ -347,7 +353,7 @@ $car = $injector->create('Transport');
 interface Engine { }
 
 class Porsche911 {
-    function __construct(Engine $engine) { }
+    function __construct(<strong>Engine</strong> $engine) { }
 }
 
 class Flat6 implements Engine { }
@@ -374,7 +380,7 @@ interface Engine { }
 class Flat6 implements Engine { }
 
 $injector = new Phemto();
-$injector->forVariable('engine')->willUse('Engine');
+$injector-><strong>forVariable('engine')</strong>->willUse('Engine');
 $car = $injector->create('Porsche911');
 ]]></php>
                 Again we instantiate <code>$car</code> to <code>new Porsche911(new Flat6())</code>.
@@ -382,15 +388,15 @@ $car = $injector->create('Porsche911');
                 Phemto can apply it's automation rules from there.
             </p>
             <p>
-                Sometimes instance specific parameters need to be passed.
+                Sometimes instance specific parameters need to be passed at construction time.
                 The simplest way to do this is just add them to the create method...
 <php><![CDATA[
 class Porsche911 {
-    function __construct($fluffy_dice, $nodding_dog) { }
+    function __construct(<strong>$fluffy_dice</strong>, <strong>$nodding_dog</strong>) { }
 }
 
 $injector = new Phemto();
-$car = $injector->create('Porsche911', true, false);
+$car = $injector->create('Porsche911', <strong>true</strong>, <strong>false</strong>);
 ]]></php>
                 These parameters will fill unfulfilled slots in the constructors, here
                 giving <code>new Porsche911(true, false)</code>.
@@ -404,8 +410,8 @@ class Porsche911 {
 }
 
 $injector = new Phemto();
-$car = $injector->fill('fluffy_dice', 'nodding_dog')
-                ->with(true, false)
+$car = $injector-><strong>fill</strong>('fluffy_dice', 'nodding_dog')
+                -><strong>with</strong>(true, false)
                 ->create('Porsche911', true);
 ]]></php>
                 These parameters apply to dependencies as well.
@@ -417,13 +423,13 @@ interface Seat { }
 interface SportsCar { }
 
 class Porsche911 implements SportsCar {
-    function fitDriversSeat(Seat $seat) { }
+    function <strong>fitDriversSeat</strong>(Seat $seat) { }
 }
 
 class BucketSeat implements Seat { }
 
 $injector = new Phemto();
-$injector->forType('SportsCar')->call('fitDriversSeat');
+$injector->forType('SportsCar')-><strong>call</strong>('fitDriversSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
                 This code is the same as...
@@ -450,7 +456,7 @@ class BucketSeat implements Seat { }
 
 $injector = new Phemto();
 $injector->willUse('StandardSeat');
-$injector->whenCreating('Porsche911')->willUse('BucketSeat');
+$injector-><strong>whenCreating</strong>('Porsche911')->willUse('BucketSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
                 This ensures that the default <code>$seat</code> is the
@@ -473,7 +479,7 @@ class BucketSeat { }
 
 $injector = new Phemto();
 $injector->willUse('StandardSeat');
-$injector->whenCreating('Porsche911')->forVariable('seat')->willUse('BucketSeat');
+$injector-><strong>whenCreating</strong>('Porsche911')->forVariable('seat')->willUse('BucketSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
             </p>
