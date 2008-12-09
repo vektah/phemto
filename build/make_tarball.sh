@@ -4,6 +4,7 @@ xsltproc phemto/docs/xslt/bundled.xslt phemto/docs/xml/index.xml > phemto/index.
 FILES=(phemto/README \
           phemto/LICENCE \
           phemto/index.html \
+          phemto/docs/bundled.css \
           phemto/phemto.php \
           phemto/lifecycle.php \
           phemto/repository.php \
