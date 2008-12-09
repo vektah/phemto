@@ -483,6 +483,24 @@ $injector-><strong>whenCreating</strong>('Porsche911')->forVariable('seat')->wil
 $car = $injector->create('Porsche911');
 ]]></php>
             </p>
+            <p>
+                Any objects created through <em>Phemto</em> can have their lifecycles controlled.
+                <em>Phemto</em> ships with <code>Factory</code> (the default), <code>Reused</code>
+                which shares a single instance and <code>Sessionable</code> which persists the
+                instance in the PHP <code>$_SESSION</code> variable.
+            </p>
+            <p>
+                Here we create a single instance only...
+<php><![CDATA[
+class Porsche911 { }
+
+$injector = new Phemto();
+$injector->willUse(new <strong>Reused</strong>('Porsche911'));
+$car = $injector->create('Porsche911');
+$same_car = $injector->create('Porsche911');
+]]></php>
+                Porsches are rather expensive after all.
+            </p>
         </section>
     </content>
     <internal>
