@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<page title="Five minute guide to Phemto" here="phemto">
-    <long_title>Dependency injection for PHP : The five minute guide to Phemto</long_title>
+<page title="Ten minute guide to Phemto" here="phemto">
+    <long_title>Dependency injection for PHP : The ten minute guide to Phemto</long_title>
     <content>
         <section name="what_is_phemto" title="The five minute guide to Dependency Injection">
             <p>
@@ -12,11 +12,18 @@
             </p>
             <p>
                 Why is this useful?
-                The easiest way to understand is to think of &quot;Dependency Injection&quot;
-                is as part of a scale with hard coding at the other end.
             </p>
             <p>
-                Creating objects in your application with hard code <code>new</code>
+                The easiest way to understand is to think of &quot;Dependency Injection&quot;
+                is as being at one end of a scale with hard coding at the other end.
+                The following is a short journey through hard coding, the <em>Factory</em>
+                pattern, the <em>Registry</em> pattern, the <em>Service Locator</em> pattern
+                and finally on to DI.
+                If you already know what dependency injection is already, then skip to
+                <a href="#installing_phemto">installing Phemto</a>.
+            </p>
+            <p>
+                Creating objects in your application with hard coded <code>new</code>
                 statements is very explicit, but it makes things difficult to change later.
                 Take this code...
 <php><![CDATA[
@@ -38,12 +45,12 @@ class MyController {
                 You can only play the inheritance card once.
             </p>
             <p>
-                The next step up is to use a factory...
+                The next step up is to use a <em>Factory</em>...
 <php><![CDATA[
 class MyController {
     function __construct(<strong>$connection_pool</strong>) {
         ...
-        $connection = $connection_pool->getConnection();
+        $connection = <strong>$connection_pool->getConnection()</strong>;
     }
 }
 ]]></php>
@@ -63,16 +70,16 @@ class MyController {
             <p>
                 Even in live code, if you want to create an object the factory author
                 has not thought of, then you have to subclass or rewrite the factory.
-                For frameworks this is a big problem.
+                For frameworks this can be a big problem.
             </p>
             <p>
-                Another way is to take construction out of the client objects altogether,
-                doing the whole lot up front...
+                The next step on the decoupling road is to take construction out of
+                the client objects altogether, doing the whole lot up front...
 <php><![CDATA[
 class MyController {
     function __construct(<strong>$registry</strong>) {
         ...
-        $connection = $registry->connection;
+        $connection = <strong>$registry->connection</strong>;
     }
 }
 ...
@@ -85,7 +92,8 @@ $controller = new MyController(<strong>$registry</strong>);
                 to get involved in creating, or overriding, lot's of objects.
                 You may also end up instantiating objects that don't get used.
                 This pattern is not enough if you want to use lazy object creation, or
-                <em>Singleton</em>s, or some other object lifecycle.
+                want something other than a <em>Singleton</em>, or some other
+                object lifecycle.
             </p>
             <p>
                 Worse, if a dependency has other dependencies that need to be handled
@@ -99,7 +107,7 @@ $controller = new MyController(<strong>$registry</strong>);
 class MyController {
     function __construct(<strong>$services</strong>) {
         ...
-        $connection = $services->connection;
+        $connection = <strong>$services->connection</strong>;
     }
 }
 ...
@@ -112,7 +120,9 @@ $controller = new MyController(<strong>$services</strong>);
                 needs to know how to create the <code>MysqlConnection</code>.
                 This can be handled by registering factories or with clever reflection tricks,
                 although passing parameters can become fiddly.
-                At least lifecycles are now under the control of the application programmer.
+                Lifecycles are fully under the control of the application programmer,
+                either by coding the factory methods or with some plug-in or configuration
+                option.
             </p>
             <p>
                 Unfortunately this near panacea shares a problem with the <em>Registry</em>.
@@ -122,7 +132,7 @@ $controller = new MyController(<strong>$services</strong>);
                 are out of luck.
             </p>
             <p>
-                <em>Dependency Injection</em> starts from a different track.
+                <em>Dependency Injection</em> starts on a different track.
                 Let's go back to our first example...
 <php><![CDATA[
 class MyController {
@@ -145,9 +155,9 @@ class MyController {
                 Changing the database connection will now have to be done in hundreds of
                 places.
                 Well, that would be true if we had to use <code>new</code>...
-<php><![CDATA[<strong>
+<php><![CDATA[
 $injector = new Phemto();
-$controller = $injector->create('MyController');</strong>
+$controller = $injector-><strong>create</strong>('MyController');
 ]]></php>
                 Now the controller specifies only an interface, and
                 the job of instantiation has been handed to an intermediary.
@@ -207,9 +217,9 @@ class MyPage implements Page {
 require_once('phemto/phemto.php');
 
 $injector = new Phemto();
-$injector->forVariable('authentication')-><strong>willUse</strong>('Authentication');
+$injector-><strong>forVariable</strong>('authentication')-><strong>willUse</strong>('Authentication');
 $injector-><strong>whenCreating</strong>('Authentication')
-         ->forVariable('permissions')->willUse(new <strong>Sessionable</strong>('Permissions'));
+         -><strong>forVariable</strong>('permissions')-><strong>willUse</strong>(new <strong>Sessionable</strong>('Permissions'));
 return $injector;
 ?>
 ]]></php>
@@ -229,7 +239,7 @@ return $injector;
 require_once('lib/my_page.php');
 
 $injector = include('wiring.php');
-$page = $injector->create('Page');
+$page = $injector-><strong>create</strong>('Page');
 ?>
 <html>...</html>
 ]]></php>
@@ -258,21 +268,25 @@ class InternalFrontControllerActionChainThingy {
 require_once('cache.php');
 
 class OurAuthentication implements Authentication {
-    function __construct(Database $database, DatabaseCache $cache) { ... }
+    function __construct(Database <strong>$database</strong>, DatabaseCache <strong>$cache</strong>) { ... }
 }
 ]]></php>
                 For a factory based framework this is a bit of a nightmare, as the
                 framework will not know how to create the caching component or where to
                 put it.
+                Requiring us to pass a factory to the framework is not enough, as the
+                framework still has to be able to give us
                 If the framework is using <em>Dependency Injection</em>, then this is just
                 an amendment to the wiring.
             </p>
             <p>
                 This wiring could be amended directly, with a user supplied wiring file...
 <php><![CDATA[
+<?php
 $injector = <strong>include('framework/wiring.php')</strong>;
 $injector->willUse('OurAuthenticator');
 return $injector;
+?>
 ]]></php>
                 More likely the framework will wrap the DI tool within it's own registration
                 system...
@@ -299,10 +313,10 @@ FrameworkRegistration::<strong>register('OurAuthentication', array('DatabaseCach
             <p>
                 The simplest way Phemto creates objects is straight from the class name...
 <php><![CDATA[
-class Porsche911 { }
+<strong>class</strong> Porsche911 { }
 
 $injector = new Phemto();
-$car = <strong>$injector->create('Porsche911')</strong>;
+$car = $injector->create('Porsche911');
 ]]></php>
                 It will search the classes currently registered by the system to
                 find a match.
@@ -340,7 +354,7 @@ class Porsche911 implements Transport { }
 class RouteMaster implements Transport { }
 
 $injector = new Phemto();
-$injector-><strong>willUse('Porsche911')</strong>;
+$injector-><strong>willUse</strong>('Porsche911');
 $car = $injector->create('Transport');
 ]]></php>
                 This is handy if there is a default implementation that you now want
@@ -380,7 +394,7 @@ interface Engine { }
 class Flat6 implements Engine { }
 
 $injector = new Phemto();
-$injector-><strong>forVariable('engine')</strong>->willUse('Engine');
+$injector-><strong>forVariable</strong>('engine')-><strong>willUse</strong>('Engine');
 $car = $injector->create('Porsche911');
 ]]></php>
                 Again we instantiate <code>$car</code> to <code>new Porsche911(new Flat6())</code>.
@@ -429,13 +443,13 @@ class Porsche911 implements SportsCar {
 class BucketSeat implements Seat { }
 
 $injector = new Phemto();
-$injector->forType('SportsCar')-><strong>call</strong>('fitDriversSeat');
+$injector-><strong>forType</strong>('SportsCar')-><strong>call</strong>('fitDriversSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
                 This code is the same as...
 <php><![CDATA[
 $car = new Porsche911();
-$car->fitDriversSeat(new BucketSeat());
+$car-><strong>fitDriversSeat</strong>(new BucketSeat());
 ]]></php>
                 Calling non-constructor methods in this way is called setter injection.
             </p>
@@ -455,8 +469,8 @@ class StandardSeat implements Seat { }
 class BucketSeat implements Seat { }
 
 $injector = new Phemto();
-$injector->willUse('StandardSeat');
-$injector-><strong>whenCreating</strong>('Porsche911')->willUse('BucketSeat');
+$injector-><strong>willUse</strong>('StandardSeat');
+$injector-><strong>whenCreating</strong>('Porsche911')-><strong>willUse</strong>('BucketSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
                 This ensures that the default <code>$seat</code> is the
@@ -479,18 +493,24 @@ class BucketSeat { }
 
 $injector = new Phemto();
 $injector->willUse('StandardSeat');
-$injector-><strong>whenCreating</strong>('Porsche911')->forVariable('seat')->willUse('BucketSeat');
+$injector-><strong>whenCreating</strong>('Porsche911')
+         -><strong>forVariable</strong>('seat')-><strong>willUse</strong>('BucketSeat');
 $car = $injector->create('Porsche911');
 ]]></php>
             </p>
             <p>
                 Any objects created through <em>Phemto</em> can have their lifecycles controlled.
-                <em>Phemto</em> ships with <code>Factory</code> (the default), <code>Reused</code>
-                which shares a single instance and <code>Sessionable</code> which persists the
-                instance in the PHP <code>$_SESSION</code> variable.
             </p>
             <p>
-                Here we create a single instance only...
+                <em>Phemto</em> ships with <code>Factory</code> (the default) which always
+                creates a new instance, <code>Reused</code> which shares a single instance,
+                and <code>Sessionable</code> which persists the instance in the
+                PHP <code>$_SESSION</code> variable.
+                These are all variants of the <code>Lifecycle</code> abstract class.
+                The developer is free to extend this.
+            </p>
+            <p>
+                Here we create a single shared <code>Porsche911</code> only...
 <php><![CDATA[
 class Porsche911 { }
 
@@ -499,13 +519,15 @@ $injector->willUse(new <strong>Reused</strong>('Porsche911'));
 $car = $injector->create('Porsche911');
 $same_car = $injector->create('Porsche911');
 ]]></php>
+                <code>$car</code> and <code>$same_car</code> both reference the
+                same object.
                 Porsches are rather expensive after all.
             </p>
         </section>
     </content>
     <internal>
         <link>
-            <a href="#what_is_phemto">What is Phemto?</a>
+            Guide to <a href="#what_is_phemto">Dependency Injection</a>?
         </link>
         <link>
             <a href="#installing_phemto">Installation</a> from the tarball.
