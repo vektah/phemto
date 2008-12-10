@@ -113,7 +113,13 @@ class Context {
     }
 
     function willUse($preference) {
-        $lifecycle = $preference instanceof Lifecycle ? $preference : new Factory($preference);
+        if ($preference instanceof Lifecycle) {
+            $lifecycle = $preference;
+        } elseif (is_object($preference)) {
+            $lifecycle = new Value($preference);
+        } else {
+            $lifecycle = new Factory($preference);
+        }
         array_unshift($this->registry, $lifecycle);
     }
 
@@ -197,7 +203,12 @@ class Context {
         if ($hint = $parameter->getClass()) {
             return $this->create($hint->getName(), $nesting);
         } elseif (isset($this->variables[$parameter->getName()])) {
-            return $this->create($this->variables[$parameter->getName()]->interface, $nesting);
+            if ($this->variables[$parameter->getName()]->preference instanceof Value) {
+                return $this->variables[$parameter->getName()]->preference->instantiate(array());
+            } elseif (! is_string($this->variables[$parameter->getName()]->preference)) {
+                return $this->variables[$parameter->getName()]->preference;
+            }
+            return $this->create($this->variables[$parameter->getName()]->preference, $nesting);
         }
         return $this->parent->instantiateParameter($parameter, $nesting);
     }
@@ -235,10 +246,10 @@ class Context {
 }
 
 class Variable {
-    public $interface;
+    public $preference;
 
-    function willUse($interface) {
-        $this->interface = $interface;
+    function willUse($preference) {
+        $this->preference = $preference;
     }
 }
 

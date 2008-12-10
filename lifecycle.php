@@ -13,6 +13,19 @@ abstract class Lifecycle {
     abstract function instantiate($dependencies);
 }
 
+class Value extends Lifecycle {
+    private $instance;
+
+    function __construct($instance) {
+        $this->instance = $instance;
+        $this->class = get_class($this->instance);
+    }
+
+    function instantiate($dependencies) {
+        return $this->instance;
+    }
+}
+
 class Factory extends Lifecycle {
     function instantiate($dependencies) {
         return call_user_func_array(
