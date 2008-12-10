@@ -144,7 +144,7 @@
 
     <xsl:template name="copyright">
         <div class="copyright">
-            Copyright<br/>Marcus Baker 2006
+            Copyright<br/>Marcus Baker 2008
         </div>
     </xsl:template>
 
