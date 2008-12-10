@@ -53,8 +53,8 @@ class Phemto {
         return $object;
     }
 
-    function pickFrom($candidates) {
-        throw new CannotDetermineImplementation();
+    function pick($type, $candidates) {
+        throw new CannotDetermineImplementation($type);
     }
 
     function settersFor($class) {
@@ -76,7 +76,7 @@ class Phemto {
         if ($value = array_shift($this->unnamed_parameters)) {
             return $value;
         }
-        throw new MissingDependency();
+        throw new MissingDependency($parameter->getName());
     }
 
     function repository() {
@@ -128,7 +128,10 @@ class Context {
     }
 
     function whenCreating($type) {
-        return $this->contexts[$type] = new Context($this);
+        if (! isset($this->contexts[$type])) {
+            $this->contexts[$type] = new Context($this);
+        }
+        return $this->contexts[$type];
     }
 
     function forType($type) {
@@ -143,7 +146,7 @@ class Context {
     }
 
     function create($type, $nesting = array()) {
-        $lifecycle = $this->pickFrom($this->repository()->candidatesFor($type));
+        $lifecycle = $this->pick($type, $this->repository()->candidatesFor($type));
         $context = $this->determineContext($lifecycle->class);
         if ($wrapper = $context->hasWrapper($type, $nesting)) {
             return $this->create($wrapper, $this->cons($wrapper, $nesting));
@@ -168,15 +171,15 @@ class Context {
         return false;
     }
 
-    function pickFrom($candidates) {
+    function pick($type, $candidates) {
         if (count($candidates) == 0) {
-            throw new CannotFindImplementation();
+            throw new CannotFindImplementation($type);
         } elseif ($preference = $this->preferFrom($candidates)) {
             return $preference;
         } elseif (count($candidates) == 1) {
             return new Factory($candidates[0]);
         } else {
-            return $this->parent->pickFrom($candidates);
+            return $this->parent->pick($type, $candidates);
         }
     }
 
@@ -203,7 +206,7 @@ class Context {
         if ($hint = $parameter->getClass()) {
             return $this->create($hint->getName(), $nesting);
         } elseif (isset($this->variables[$parameter->getName()])) {
-            if ($this->variables[$parameter->getName()]->preference instanceof Value) {
+            if ($this->variables[$parameter->getName()]->preference instanceof Lifecycle) {
                 return $this->variables[$parameter->getName()]->preference->instantiate(array());
             } elseif (! is_string($this->variables[$parameter->getName()]->preference)) {
                 return $this->variables[$parameter->getName()]->preference;
