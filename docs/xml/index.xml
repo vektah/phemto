@@ -135,6 +135,8 @@ $controller = new MyController(<strong>$services</strong>);
                 <em>Dependency Injection</em> starts on a different track.
                 Let's go back to our first example...
 <php><![CDATA[
+class MysqlConnection { ... }
+
 class MyController {
     function __construct() {
         ...
@@ -144,6 +146,8 @@ class MyController {
 ]]></php>
                 ...and make the dependency external...
 <php><![CDATA[
+class MysqlConnection { ... }
+
 class MyController {
     function __construct(<strong>Connection $connection</strong>) {
         ...
@@ -159,24 +163,48 @@ class MyController {
 $injector = new Phemto();
 $controller = $injector-><strong>create</strong>('MyController');
 ]]></php>
+                Believe it or not, this is all that's needed.
+            </p>
+            <p>
+                <code>Phemto</code> is specialised in discovering how
+                to create classes, and automates a surprising amount.
+                Just from the interface hint, it can deduce the class that
+                <code>MysqlConnection</code> is the only candidate to
+                fulfil the <code>Connection</code> type hint.
+            </p>
+            <p>
+                More complicated situations can require additional hinting,
+                normally placed in a &quot;wiring file&quot;.
+                To give you a flavour, here is a real life wiring file...
+<php><![CDATA[<?php
+require_once('phemto/phemto.php');
+
+$injector = new Phemto();
+$injector->whenCreating('Page')->forVariable('session')->willUse(new Reused('Session'));
+$injector->whenCreating('Page')->forVariable('continuation')->willUse('Continuation');
+$injector->whenCreating('Page')->forVariable('alerts')->willUse('Alert');
+$injector->whenCreating('Page')->forVariable('accounts')->willUse('Accounts');
+$injector->whenCreating('Page')->forVariable('mailer')->willUse('Mailer');
+$injector->whenCreating('Page')->forVariable('clock')->willUse('Clock');
+$injector->whenCreating('Page')->forVariable('request')->willUse('Request');
+return $injector;
+?>]]></php>
+                This amount of configuration is typical for a medium sized project.
+            </p>
+            <p>
                 Now the controller specifies only an interface, and
                 the job of instantiation has been handed to an intermediary.
                 The <code>MyController</code> is no longer needs to know about the
                 <code>MysqlConnection</code>.
                 Instead the <code>$injector</code> has to know about both.
-                This is &quot;Inversion of Control&quot;.
-            </p>
-            <p>
-                Fortunately, <code>Phemto</code> is specialised in discovering how
-                to create classes, and automates a surprising amount.
-                Just from the interface hint, it can deduce the class that fits the bill.
+                This is <a href="http://martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>.
             </p>
         </section>
         <section name="installing_phemto" title="Installing Phemto">
             <p>
                 The phemto download is a pure PHP tarball.
                 Simply untar it...
-                <sh>tar -zxf phemto_0.1_alpha3.tar.gz</sh>
+                <sh>tar -zxf phemto_0.1_alpha6.tar.gz</sh>
                 You can then <code>require_once()</code> the <em>phemto.php</em> file
                 directly, or place the phemto folder in your path.
             </p>
