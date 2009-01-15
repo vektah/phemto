@@ -101,7 +101,7 @@ class ReflectionCache {
 
     private function buildIndex($classes) {
         foreach ($classes as $class) {
-            $interfaces = class_implements($class);
+            $interfaces = array_values(class_implements($class));
             $this->interfaces_of[$class] = $interfaces;
             foreach ($interfaces as $interface) {
                 $this->crossReference($interface, $class);
