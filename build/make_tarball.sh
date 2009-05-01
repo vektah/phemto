@@ -1,5 +1,28 @@
 #!/bin/bash
 
+checkWorkingCopyHasValidRevisionNumber()
+{
+    cat <<EOF
+
+Working copy revision numbers are not updated after a commit. Hence, 
+in order to attach a valid revision number to the release, you need 
+to do an svn update before running this script. 
+
+See: "Mixed Revision Working Copies"
+http://svnbook.red-bean.com/en/1.4/svn.basic.in-action.html
+
+If you need to perform an svn update enter "x" to exit this script.
+Or hit any other key to continue...
+
+EOF
+
+    read REPLY
+    if [ "$REPLY" = 'x' ]
+    then
+        exit 0	
+    fi
+}
+
 # absolute path to parent of "build/"
 # $1 - this script's $0 arg
 getTrunk()
@@ -42,7 +65,9 @@ makeDocs()
 
 getCurrentRevision()
 {
+    svn up $TRUNK 
     echo `svn info $TRUNK | grep Revision:[[:space:]]*[[:digit:]]*$ | grep -o [[:digit:]]*$`
+    return 0
 }
 
 createReleaseFile()
@@ -64,6 +89,8 @@ WRITABLE_DIR=/tmp/
 TMP_BUILD_DIR=${WRITABLE_DIR}'phemto-tmp-build/'
 TRUNK=`getTrunk $0`/
 NAME=phemto_`cat ${TRUNK}'VERSION'`.tar.gz
+
+checkWorkingCopyHasValidRevisionNumber
 createTemporaryBuild
 createReleaseFile
 cleanUp
