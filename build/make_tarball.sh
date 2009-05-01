@@ -1,28 +1,5 @@
 #!/bin/bash
 
-checkWorkingCopyHasValidRevisionNumber()
-{
-    cat <<EOF
-
-Working copy revision numbers are not updated after a commit. Hence, 
-in order to attach a valid revision number to the release, you need 
-to do an svn update before running this script. 
-
-See: "Mixed Revision Working Copies"
-http://svnbook.red-bean.com/en/1.4/svn.basic.in-action.html
-
-If you need to perform an svn update enter "x" to exit this script.
-Or hit any other key to continue...
-
-EOF
-
-    read REPLY
-    if [ "$REPLY" = 'x' ]
-    then
-        exit 0	
-    fi
-}
-
 # absolute path to parent of "build/"
 # $1 - this script's $0 arg
 getTrunk()
@@ -30,6 +7,41 @@ getTrunk()
     cd `dirname $1`/
     cd ..
     echo `pwd -P`
+}
+
+checkWorkingCopyHasValidRevisionNumber()
+{
+    local version=`svnversion $TRUNK`
+    if [ "`isUpdated $TRUNK`" = 'false' ]
+    then
+        updateMessage
+        exit 0
+    fi
+}
+
+isUpdated()
+{
+    if [ "`svnversion $1 | grep ^[[:digit:]]*$`" ]
+    then
+        echo true
+    else
+        echo false
+    fi
+}
+
+updateMessage()
+{
+    cat <<EOF
+
+Working copy revision numbers are not updated after
+a commit. Hence, in order to attach a valid revision 
+number to the release, you need to do an svn update 
+before running this script. 
+
+More info: "Mixed Revision Working Copies"
+http://svnbook.red-bean.com/en/1.4/svn.basic.in-action.html
+
+EOF
 }
 
 createTemporaryBuild()
@@ -53,7 +65,7 @@ createTemporaryBuild()
     done
 
     makeDocs
-    echo "revision: `getCurrentRevision $TRUNK`" >> ${TMP_BUILD_DIR}'phemto/VERSION'
+    echo "revision: `svnversion $TRUNK`" >> ${TMP_BUILD_DIR}'phemto/VERSION'
 }
 
 makeDocs()
@@ -61,13 +73,6 @@ makeDocs()
     mkdir -p ${TMP_BUILD_DIR}'phemto/docs'
     cp ${TRUNK}'docs/bundled.css' ${TMP_BUILD_DIR}'phemto/docs/'
     xsltproc ${TRUNK}'docs/xslt/bundled.xslt' ${TRUNK}'docs/xml/index.xml' > ${TMP_BUILD_DIR}'phemto/index.html'
-}
-
-getCurrentRevision()
-{
-    svn up $TRUNK 
-    echo `svn info $TRUNK | grep Revision:[[:space:]]*[[:digit:]]*$ | grep -o [[:digit:]]*$`
-    return 0
 }
 
 createReleaseFile()
