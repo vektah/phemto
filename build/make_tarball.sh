@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# absolute path to parent of "build/"
-# $1 - this script's $0 arg
+# Discover the absolute path to the main phemto dir in the 
+# working copy (the repository dir: "phemto/trunk").
+# $1 - the $0 arg of this script
 getTrunk()
 {
     cd `dirname $1`/
@@ -9,12 +10,16 @@ getTrunk()
     echo `pwd -P`
 }
 
+# Releases are now tagged with the revision number (helps with 
+# support queries). Note that working copy revision numbers do 
+# not update following a commit* - hence this currency check.
+# (*More info: "Mixed Revision Working Copies" 
+# http://svnbook.red-bean.com/en/1.4/svn.basic.in-action.html)
 checkWorkingCopyHasValidRevisionNumber()
 {
-    local version=`svnversion $TRUNK`
     if [ "`isUpdated $TRUNK`" = 'false' ]
     then
-        updateMessage
+        echo 'Please perform an svn update then run this script again.'
         exit 0
     fi
 }
@@ -27,21 +32,6 @@ isUpdated()
     else
         echo false
     fi
-}
-
-updateMessage()
-{
-    cat <<EOF
-
-Working copy revision numbers are not updated after
-a commit. Hence, in order to attach a valid revision 
-number to the release, you need to do an svn update 
-before running this script. 
-
-More info: "Mixed Revision Working Copies"
-http://svnbook.red-bean.com/en/1.4/svn.basic.in-action.html
-
-EOF
 }
 
 createTemporaryBuild()
