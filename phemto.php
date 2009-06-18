@@ -202,9 +202,8 @@ class Context {
             } catch (Exception $e) {
                 if ($parameter->isOptional()) {
                     break;
-                } else {
-                    throw $e;
                 }
+                throw $e;
             }
         }
         return $values;
