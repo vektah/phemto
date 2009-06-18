@@ -197,7 +197,15 @@ class Context {
     function createDependencies($parameters, $nesting) {
         $values = array();
         foreach ($parameters as $parameter) {
-            $values[] = $this->instantiateParameter($parameter, $nesting);
+            try {
+                $values[] = $this->instantiateParameter($parameter, $nesting);
+            } catch (Exception $e) {
+                if ($parameter->isOptional()) {
+                    break;
+                } else {
+                    throw $e;
+                }
+            }
         }
         return $values;
     }
