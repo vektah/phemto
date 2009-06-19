@@ -38,6 +38,16 @@ class ManyOptionalArguments {
     }
 }
 
+class OptionalArgumentsInSetter {
+    public $maybe, $never, $unlikely;
+
+    function readyToGo($maybe = null, $never = null, $unlikely = null) {
+        $this->maybe = $maybe;
+        $this->never = $never;
+        $this->unlikely = $unlikely;
+    }
+}
+
 class OptionalArgumentsWillBeInjectedIfAvailable extends UnitTestCase {
     function testHintedOptionalArgumentWillBeUsed() {
         $injector = new Phemto();
@@ -70,6 +80,16 @@ class OptionalArgumentsWillBeInjectedIfAvailable extends UnitTestCase {
         $injector->forVariable('unlikely')->willUse('MaybeThis');
         $this->assertIdentical($injector->create('ManyOptionalArguments'),
                                new ManyOptionalArguments(new MaybeThis(), null, null));
+    }
+
+    function testSetterInjectionStopsAtFirstMissingArgument() {
+        $injector = new Phemto();
+        $injector->forVariable('maybe')->willUse('MaybeThis');
+        $injector->forVariable('unlikely')->willUse('MaybeThis');
+        $injector->forType('OptionalArgumentsInSetter')->call('readyToGo');
+        $expected = new OptionalArgumentsInSetter();
+        $expected->readyToGo(new MaybeThis());
+        $this->assertIdentical($injector->create('OptionalArgumentsInSetter'), $expected);
     }
 }
 ?>
