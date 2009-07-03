@@ -56,6 +56,7 @@ class Sessionable extends Lifecycle {
     }
 
     function instantiate($dependencies) {
+        @session_start();
         if (! isset($_SESSION[$this->slot])) {
             $_SESSION[$this->slot] = call_user_func_array(
                     array(new ReflectionClass($this->class), 'newInstance'),
