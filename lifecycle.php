@@ -50,9 +50,9 @@ class Reused extends Lifecycle {
 class Sessionable extends Lifecycle {
     private $slot;
 
-    function __construct($slot, $class) {
-        $this->slot = $slot;
+    function __construct($class, $slot = false) {
         parent::__construct($class);
+        $this->slot = $slot ? $slot : $class;
     }
 
     function instantiate($dependencies) {
