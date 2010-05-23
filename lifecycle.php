@@ -18,7 +18,6 @@ class Value extends Lifecycle {
 
     function __construct($instance) {
         $this->instance = $instance;
-        $this->class = get_class($this->instance);
     }
 
     function instantiate($dependencies) {

@@ -36,7 +36,7 @@ class CanInjectSpecificValue extends UnitTestCase {
 
     function testInjectingString() {
         $injector = new Phemto();
-        $injector->forVariable('thing')->willUse(new value('100'));
+        $injector->forVariable('thing')->useString('100');
         $this->assertIdentical($injector->create('WrapAnything'),
                                new WrapAnything('100'));
     }

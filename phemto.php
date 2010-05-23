@@ -124,7 +124,7 @@ class Context {
     }
 
     function forVariable($name) {
-        return $this->variables[$name] = new Variable();
+        return $this->variables[$name] = new Variable($this);
     }
 
     function whenCreating($type) {
@@ -257,9 +257,20 @@ class Context {
 
 class Variable {
     public $preference;
+    private $context;
+    
+    function __construct($context) {
+        $this->context = $context;
+    }
 
     function willUse($preference) {
         $this->preference = $preference;
+        return $this->context;
+    }
+    
+    function useString($string) {
+        $this->preference = new Value($string);
+        return $this->context;
     }
 }
 
