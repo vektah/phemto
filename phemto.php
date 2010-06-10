@@ -53,7 +53,7 @@ class Phemto {
         return $object;
     }
 
-    function pick($type, $candidates) {
+    function pickFactory($type, $candidates) {
         throw new CannotDetermineImplementation($type);
     }
 
@@ -146,7 +146,7 @@ class Context {
     }
 
     function create($type, $nesting = array()) {
-        $lifecycle = $this->pick($type, $this->repository()->candidatesFor($type));
+        $lifecycle = $this->pickFactory($type, $this->repository()->candidatesFor($type));
         $context = $this->determineContext($lifecycle->class);
         if ($wrapper = $context->hasWrapper($type, $nesting)) {
             return $this->create($wrapper, $this->cons($wrapper, $nesting));
@@ -154,12 +154,20 @@ class Context {
         $instance = $lifecycle->instantiate($context->createDependencies(
                         $this->repository()->getConstructorParameters($lifecycle->class),
                         $this->cons($lifecycle->class, $nesting)));
-        foreach ($context->settersFor($lifecycle->class) as $setter) {
-            $context->invoke($instance, $setter, $context->createDependencies(
-                                $this->repository()->getParameters($lifecycle->class, $setter),
-                                $this->cons($lifecycle->class, $nesting)));
-        }
+        $this->invokeSetters($context, $nesting, $lifecycle->class, $instance);
         return $instance;
+    }
+
+    function pickFactory($type, $candidates) {
+        if (count($candidates) == 0) {
+            throw new CannotFindImplementation($type);
+        } elseif ($preference = $this->preferFrom($candidates)) {
+            return $preference;
+        } elseif (count($candidates) == 1) {
+            return new Factory($candidates[0]);
+        } else {
+            return $this->parent->pickFactory($type, $candidates);
+        }
     }
 
     function hasWrapper($type, $already_applied) {
@@ -170,20 +178,16 @@ class Context {
         }
         return false;
     }
-
-    function pick($type, $candidates) {
-        if (count($candidates) == 0) {
-            throw new CannotFindImplementation($type);
-        } elseif ($preference = $this->preferFrom($candidates)) {
-            return $preference;
-        } elseif (count($candidates) == 1) {
-            return new Factory($candidates[0]);
-        } else {
-            return $this->parent->pick($type, $candidates);
+    
+    private function invokeSetters($context, $nesting, $class, $instance) {
+        foreach ($context->settersFor($class) as $setter) {
+            $context->invoke($instance, $setter, $context->createDependencies(
+                                $this->repository()->getParameters($class, $setter),
+                                $this->cons($class, $nesting)));
         }
     }
 
-    function settersFor($class) {
+    private function settersFor($class) {
         $setters = isset($this->types[$class]) ? $this->types[$class]->setters : array();
         return array_values(array_unique(array_merge(
                     $setters, $this->parent->settersFor($class))));
@@ -209,7 +213,7 @@ class Context {
         return $values;
     }
 
-    function instantiateParameter($parameter, $nesting) {
+    private function instantiateParameter($parameter, $nesting) {
         if ($hint = $parameter->getClass()) {
             return $this->create($hint->getName(), $nesting);
         } elseif (isset($this->variables[$parameter->getName()])) {
@@ -245,7 +249,7 @@ class Context {
         return false;
     }
 
-    function cons($head, $tail) {
+    private function cons($head, $tail) {
         array_unshift($tail, $head);
         return $tail;
     }
