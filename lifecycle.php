@@ -8,7 +8,9 @@ abstract class Lifecycle {
     }
     
     private function triggerAutoload($class) {
-        class_exists($class);
+        if (! class_exists($class)) {
+            throw new CannotFindImplementation($class);
+        }
     }
 
     function isOneOf($candidates) {
