@@ -4,6 +4,7 @@ abstract class Lifecycle {
 
     function __construct($class) {
         $this->class = $class;
+        class_exists($class);
     }
 
     function isOneOf($candidates) {

@@ -1,3 +1,3 @@
 <?php
-class MyDEpendency { }
+class MyDependency { }
 ?>

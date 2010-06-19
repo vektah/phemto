@@ -37,5 +37,13 @@ class AsMuchAsPossibleWorksWithAutoload extends UnitTestCase {
         $this->assertIsA($object, 'FindMyDependency');
         $this->assertIsA($object->dependency, 'MyDependency');
     }
+    
+    function testCanFulfilInterfaceFromAutoloadedClass() {
+        $injector = new Phemto();
+        $injector->willUse('MyImplementation');
+        $object = $injector->create('FindMyInterfaceHint');
+        $this->assertIsA($object, 'FindMyInterfaceHint');
+        $this->assertIsA($object->dependency, 'MyImplementation');
+    }
 }
 ?>
