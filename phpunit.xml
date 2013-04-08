@@ -1,0 +1,10 @@
+<phpunit
+		bootstrap="test/phemto/bootstrap.php"
+		colors="true">
+
+	<testsuites>
+		<testsuite name="acceptance">
+			<directory>/home/adams/projects/phemto/test</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

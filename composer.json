@@ -1,0 +1,16 @@
+{
+    "name": "phemto/phemto",
+    "description": "Phemto PHP Dependency Injection Framework",
+    "authors": [
+        {
+            "name": "Adam Scarr",
+            "email": "adams@benon.com"
+        }
+    ],
+    "require-dev": {
+		"phpunit/phpunit": "3.7.10"
+    },
+    "autoload": {
+        "psr-0": {"phemto": "src/"}
+    }
+}
