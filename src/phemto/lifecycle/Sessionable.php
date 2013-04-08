@@ -4,6 +4,11 @@ namespace phemto\lifecycle;
 
 use ReflectionClass;
 
+/**
+ * Factory cached in session
+ *
+ * @package phemto\lifecycle
+ */
 class Sessionable extends Lifecycle
 {
 	private $slot;
@@ -27,5 +32,3 @@ class Sessionable extends Lifecycle
 		return $_SESSION[$this->slot];
 	}
 }
-
-?>

@@ -3,6 +3,11 @@ namespace phemto;
 
 use phemto\lifecycle\Value;
 
+/**
+ * Represents a named variable. Allows injecting dependencies by name
+ *
+ * @package phemto
+ */
 class Variable
 {
 	/**

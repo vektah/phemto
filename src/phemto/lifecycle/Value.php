@@ -1,6 +1,11 @@
 <?php
 namespace phemto\lifecycle;
 
+/**
+ * Always returns a set value.
+ *
+ * @package phemto\lifecycle
+ */
 class Value extends Lifecycle
 {
 	private $instance;

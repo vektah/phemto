@@ -1,6 +1,11 @@
 <?php
 namespace phemto\lifecycle;
 
+/**
+ * Creates a new object each time its required.
+ *
+ * @package phemto\lifecycle
+ */
 class Factory extends Lifecycle
 {
 	function instantiate($dependencies)

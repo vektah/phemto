@@ -5,6 +5,11 @@ use phemto\exception\CannotDetermineImplementation;
 use phemto\exception\MissingDependency;
 use phemto\repository\ClassRepository;
 
+/**
+ * Forward facing api / dependency container.
+ *
+ * @package phemto
+ */
 class Phemto
 {
 	/**

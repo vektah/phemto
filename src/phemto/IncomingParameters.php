@@ -1,6 +1,10 @@
 <?php
 namespace phemto;
 
+/**
+ * Allows named paramaters to be specified when calling a method of a class but still have di.
+ * @package phemto
+ */
 class IncomingParameters
 {
 	private $injector;

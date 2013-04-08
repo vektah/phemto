@@ -1,6 +1,11 @@
 <?php
 namespace phemto\repository;
 
+/**
+ * Caches reflection queries.
+ *
+ * @package phemto\repository
+ */
 class ReflectionCache
 {
 	private $implementations_of = array();

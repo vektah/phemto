@@ -7,8 +7,15 @@
             "email": "adams@benon.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "pear.phpdoc.org"
+        }
+    ],
     "require-dev": {
-		"phpunit/phpunit": "3.7.10"
+		"phpunit/phpunit": "3.7.10",
+        "pear-pear.phpdoc.org/phpDocumentor": "*@dev"
     },
     "autoload": {
         "psr-0": {"phemto": "src/"}

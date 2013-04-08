@@ -3,6 +3,11 @@ namespace phemto\lifecycle;
 
 use phemto\exception\CannotFindImplementation;
 
+/**
+ * Base lifecycle class, Invoked when a dependency is requested.
+ *
+ * @package phemto\lifecycle
+ */
 abstract class Lifecycle
 {
 	public $class;

@@ -1,6 +1,11 @@
 <?php
 namespace phemto\lifecycle;
 
+/**
+ * Factory + Singleton lifecycle provider.
+ *
+ * @package phemto\lifecycle
+ */
 class Reused extends Lifecycle
 {
 	private $instance;

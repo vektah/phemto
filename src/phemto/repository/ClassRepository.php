@@ -1,8 +1,16 @@
 <?php
 namespace phemto\repository;
 
+/**
+ * The actual DI container
+ *
+ * @package phemto\repository
+ */
 class ClassRepository
 {
+	/**
+	 * @var ReflectionCache
+	 */
 	private static $reflection = false;
 
 	function __construct()

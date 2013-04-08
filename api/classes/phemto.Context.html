@@ -1,0 +1,409 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+<meta charset="utf-8">
+<title>phpDocumentor » \phemto\Context</title>
+<meta name="author" content="Mike van Riel">
+<meta name="description" content="">
+<link href="../css/template.css" rel="stylesheet" media="all">
+<script src="../js/jquery-1.7.1.min.js" type="text/javascript"></script><script src="../js/jquery-ui-1.8.2.custom.min.js" type="text/javascript"></script><script src="../js/jquery.mousewheel.min.js" type="text/javascript"></script><script src="../js/bootstrap.js" type="text/javascript"></script><script src="../js/template.js" type="text/javascript"></script><script src="../js/prettify/prettify.min.js" type="text/javascript"></script><link rel="shortcut icon" href="../img/favicon.ico">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="72x72" href="../img/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="114x114" href="../img/apple-touch-icon-114x114.png">
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+<div class="navbar-inner"><div class="container">
+<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></a><a class="brand" href="../index.html">phpDocumentor</a><div class="nav-collapse"><ul class="nav">
+<li class="dropdown">
+<a href="#api" class="dropdown-toggle" data-toggle="dropdown">
+                                    API Documentation <b class="caret"></b></a><ul class="dropdown-menu">
+<li><a>Namespaces</a></li>
+<li><a href="../namespaces/phemto.html"><i class="icon-th"></i> phemto</a></li>
+<li><a>Packages</a></li>
+<li><a href="../packages/Default.html"><i class="icon-folder-open"></i> Default</a></li>
+<li><a href="../packages/phemto.html"><i class="icon-folder-open"></i> phemto</a></li>
+</ul>
+</li>
+<li class="dropdown" id="charts-menu">
+<a href="#charts" class="dropdown-toggle" data-toggle="dropdown">
+                                    Charts <b class="caret"></b></a><ul class="dropdown-menu"><li><a href="../graph_class.html"><i class="icon-list-alt"></i> Class hierarchy diagram</a></li></ul>
+</li>
+<li class="dropdown" id="reports-menu">
+<a href="#reports" class="dropdown-toggle" data-toggle="dropdown">
+                                    Reports <b class="caret"></b></a><ul class="dropdown-menu">
+<li><a href="../errors.html"><i class="icon-remove-sign"></i> Errors 
+                <span class="label label-info">104</span></a></li>
+<li><a href="../markers.html"><i class="icon-map-marker"></i> Markers 
+                <ul></ul></a></li>
+<li><a href="../deprecated.html"><i class="icon-stop"></i> Deprecated elements 
+                <span class="label label-info">0</span></a></li>
+</ul>
+</li>
+</ul></div>
+</div></div>
+<div class="go_to_top"><a href="#___" style="color: inherit">Back to top  <i class="icon-upload icon-white"></i></a></div>
+</div>
+<div id="___" class="container">
+<noscript><div class="alert alert-warning">
+                            Javascript is disabled; several features are only available
+                            if Javascript is enabled.
+                        </div></noscript>
+<div class="row">
+<div class="span4">
+<span class="btn-group visibility" data-toggle="buttons-checkbox"><button class="btn public active" title="Show public elements">Public</button><button class="btn protected" title="Show protected elements">Protected</button><button class="btn private" title="Show private elements">Private</button><button class="btn inherited active" title="Show inherited elements">Inherited</button></span><div class="btn-group view pull-right" data-toggle="buttons-radio">
+<button class="btn details" title="Show descriptions and method names"><i class="icon-list"></i></button><button class="btn simple" title="Show only method names"><i class="icon-align-justify"></i></button>
+</div>
+<ul class="side-nav nav nav-list">
+<li class="nav-header">
+<i class="icon-custom icon-method"></i> Methods
+                    <ul>
+<li class="method public "><a href="#method___construct" title="__construct :: "><span class="description">__construct()
+        </span><pre>__construct()</pre></a></li>
+<li class="method public "><a href="#method_create" title="create :: "><span class="description">create()
+        </span><pre>create()</pre></a></li>
+<li class="method public "><a href="#method_createDependencies" title="createDependencies :: "><span class="description">createDependencies()
+        </span><pre>createDependencies()</pre></a></li>
+<li class="method public "><a href="#method_forType" title="forType :: "><span class="description">forType()
+        </span><pre>forType()</pre></a></li>
+<li class="method public "><a href="#method_forVariable" title="forVariable :: "><span class="description">forVariable()
+        </span><pre>forVariable()</pre></a></li>
+<li class="method public "><a href="#method_hasWrapper" title="hasWrapper :: "><span class="description">hasWrapper()
+        </span><pre>hasWrapper()</pre></a></li>
+<li class="method public "><a href="#method_pickFactory" title="pickFactory :: "><span class="description">pickFactory()
+        </span><pre>pickFactory()</pre></a></li>
+<li class="method public "><a href="#method_repository" title="repository :: "><span class="description">repository()
+        </span><pre>repository()</pre></a></li>
+<li class="method public "><a href="#method_whenCreating" title="whenCreating :: "><span class="description">whenCreating()
+        </span><pre>whenCreating()</pre></a></li>
+<li class="method public "><a href="#method_willUse" title="willUse :: "><span class="description">willUse()
+        </span><pre>willUse()</pre></a></li>
+<li class="method public "><a href="#method_wrapWith" title="wrapWith :: "><span class="description">wrapWith()
+        </span><pre>wrapWith()</pre></a></li>
+<li class="method public "><a href="#method_wrappersFor" title="wrappersFor :: "><span class="description">wrappersFor()
+        </span><pre>wrappersFor()</pre></a></li>
+</ul>
+</li>
+<li class="nav-header private">» Private
+                    <ul>
+<li class="method private "><a href="#method_cons" title="cons :: "><span class="description">cons()
+        </span><pre>cons()</pre></a></li>
+<li class="method private "><a href="#method_determineContext" title="determineContext :: "><span class="description">determineContext()
+        </span><pre>determineContext()</pre></a></li>
+<li class="method private "><a href="#method_instantiateParameter" title="instantiateParameter :: "><span class="description">instantiateParameter()
+        </span><pre>instantiateParameter()</pre></a></li>
+<li class="method private "><a href="#method_invoke" title="invoke :: "><span class="description">invoke()
+        </span><pre>invoke()</pre></a></li>
+<li class="method private "><a href="#method_invokeSetters" title="invokeSetters :: "><span class="description">invokeSetters()
+        </span><pre>invokeSetters()</pre></a></li>
+<li class="method private "><a href="#method_preferFrom" title="preferFrom :: "><span class="description">preferFrom()
+        </span><pre>preferFrom()</pre></a></li>
+<li class="method private "><a href="#method_settersFor" title="settersFor :: "><span class="description">settersFor()
+        </span><pre>settersFor()</pre></a></li>
+</ul>
+</li>
+<li class="nav-header">
+<i class="icon-custom icon-property"></i> Properties
+                    <ul></ul>
+</li>
+<li class="nav-header private">» Private
+                    <ul>
+<li class="property private "><a href="#property_contexts" title="$contexts :: "><span class="description"></span><pre>$contexts</pre></a></li>
+<li class="property private "><a href="#property_parent" title="$parent :: "><span class="description"></span><pre>$parent</pre></a></li>
+<li class="property private "><a href="#property_registry" title="$registry :: "><span class="description"></span><pre>$registry</pre></a></li>
+<li class="property private "><a href="#property_types" title="$types :: "><span class="description"></span><pre>$types</pre></a></li>
+<li class="property private "><a href="#property_variables" title="$variables :: "><span class="description"></span><pre>$variables</pre></a></li>
+<li class="property private "><a href="#property_wrappers" title="$wrappers :: "><span class="description"></span><pre>$wrappers</pre></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="span8">
+<a id="\phemto\Context"></a><ul class="breadcrumb">
+<li>
+<a href="../index.html"><i class="icon-custom icon-class"></i></a><span class="divider">\</span>
+</li>
+<li><a href="../namespaces/phemto.html">phemto</a></li>
+<li class="active">
+<span class="divider">\</span><a href="../classes/phemto.Context.html">Context</a>
+</li>
+</ul>
+<div class="element class"><div class="details">
+<h3>
+<i class="icon-custom icon-method"></i> Methods</h3>
+<a id="method___construct"></a><div class="element clickable method public method___construct" data-toggle="collapse" data-target=".method___construct .collapse">
+<h2>__construct()
+        </h2>
+<pre>__construct($parent) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$parent</h4></div>
+</div></div>
+</div>
+<a id="method_create"></a><div class="element clickable method public method_create" data-toggle="collapse" data-target=".method_create .collapse">
+<h2>create()
+        </h2>
+<pre>create($type, $nesting) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+<div class="subelement argument"><h4>$nesting</h4></div>
+</div></div>
+</div>
+<a id="method_createDependencies"></a><div class="element clickable method public method_createDependencies" data-toggle="collapse" data-target=".method_createDependencies .collapse">
+<h2>createDependencies()
+        </h2>
+<pre>createDependencies($parameters, $nesting) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$parameters</h4></div>
+<div class="subelement argument"><h4>$nesting</h4></div>
+</div></div>
+</div>
+<a id="method_forType"></a><div class="element clickable method public method_forType" data-toggle="collapse" data-target=".method_forType .collapse">
+<h2>forType()
+        </h2>
+<pre>forType($type) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+</div></div>
+</div>
+<a id="method_forVariable"></a><div class="element clickable method public method_forVariable" data-toggle="collapse" data-target=".method_forVariable .collapse">
+<h2>forVariable()
+        </h2>
+<pre>forVariable($name) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$name</h4></div>
+</div></div>
+</div>
+<a id="method_hasWrapper"></a><div class="element clickable method public method_hasWrapper" data-toggle="collapse" data-target=".method_hasWrapper .collapse">
+<h2>hasWrapper()
+        </h2>
+<pre>hasWrapper($type, $already_applied) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+<div class="subelement argument"><h4>$already_applied</h4></div>
+</div></div>
+</div>
+<a id="method_pickFactory"></a><div class="element clickable method public method_pickFactory" data-toggle="collapse" data-target=".method_pickFactory .collapse">
+<h2>pickFactory()
+        </h2>
+<pre>pickFactory($type, $candidates) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+<div class="subelement argument"><h4>$candidates</h4></div>
+</div></div>
+</div>
+<a id="method_repository"></a><div class="element clickable method public method_repository" data-toggle="collapse" data-target=".method_repository .collapse">
+<h2>repository()
+        </h2>
+<pre>repository() : <a href="../classes/phemto.repository.ClassRepository.html">\phemto\repository\ClassRepository</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Returns</h3>
+<div class="subelement response"><code><a href="../classes/phemto.repository.ClassRepository.html">\phemto\repository\ClassRepository</a></code></div>
+</div></div>
+</div>
+<a id="method_whenCreating"></a><div class="element clickable method public method_whenCreating" data-toggle="collapse" data-target=".method_whenCreating .collapse">
+<h2>whenCreating()
+        </h2>
+<pre>whenCreating($type) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+</div></div>
+</div>
+<a id="method_willUse"></a><div class="element clickable method public method_willUse" data-toggle="collapse" data-target=".method_willUse .collapse">
+<h2>willUse()
+        </h2>
+<pre>willUse($preference) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$preference</h4></div>
+</div></div>
+</div>
+<a id="method_wrapWith"></a><div class="element clickable method public method_wrapWith" data-toggle="collapse" data-target=".method_wrapWith .collapse">
+<h2>wrapWith()
+        </h2>
+<pre>wrapWith($type) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+</div></div>
+</div>
+<a id="method_wrappersFor"></a><div class="element clickable method public method_wrappersFor" data-toggle="collapse" data-target=".method_wrappersFor .collapse">
+<h2>wrappersFor()
+        </h2>
+<pre>wrappersFor($type) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$type</h4></div>
+</div></div>
+</div>
+<a id="method_cons"></a><div class="element clickable method private method_cons" data-toggle="collapse" data-target=".method_cons .collapse">
+<h2>cons()
+        </h2>
+<pre>cons($head, $tail) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$head</h4></div>
+<div class="subelement argument"><h4>$tail</h4></div>
+</div></div>
+</div>
+<a id="method_determineContext"></a><div class="element clickable method private method_determineContext" data-toggle="collapse" data-target=".method_determineContext .collapse">
+<h2>determineContext()
+        </h2>
+<pre>determineContext($class) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$class</h4></div>
+</div></div>
+</div>
+<a id="method_instantiateParameter"></a><div class="element clickable method private method_instantiateParameter" data-toggle="collapse" data-target=".method_instantiateParameter .collapse">
+<h2>instantiateParameter()
+        </h2>
+<pre>instantiateParameter(<a href="http://php.net/manual/en/class.reflectionparameter.php">\ReflectionParameter</a> $parameter, $nesting) : mixed | <a href="../classes/phemto.lifecycle.Value.html">\phemto\lifecycle\Value</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument">
+<h4>$parameter</h4>
+<code><a href="http://php.net/manual/en/class.reflectionparameter.php">\ReflectionParameter</a></code>
+</div>
+<div class="subelement argument"><h4>$nesting</h4></div>
+<h3>Returns</h3>
+<div class="subelement response">
+<code>mixed</code><code><a href="../classes/phemto.lifecycle.Value.html">\phemto\lifecycle\Value</a></code>
+</div>
+</div></div>
+</div>
+<a id="method_invoke"></a><div class="element clickable method private method_invoke" data-toggle="collapse" data-target=".method_invoke .collapse">
+<h2>invoke()
+        </h2>
+<pre>invoke($instance, $method, $arguments) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$instance</h4></div>
+<div class="subelement argument"><h4>$method</h4></div>
+<div class="subelement argument"><h4>$arguments</h4></div>
+</div></div>
+</div>
+<a id="method_invokeSetters"></a><div class="element clickable method private method_invokeSetters" data-toggle="collapse" data-target=".method_invokeSetters .collapse">
+<h2>invokeSetters()
+        </h2>
+<pre>invokeSetters($context, $nesting, $class, $instance) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$context</h4></div>
+<div class="subelement argument"><h4>$nesting</h4></div>
+<div class="subelement argument"><h4>$class</h4></div>
+<div class="subelement argument"><h4>$instance</h4></div>
+</div></div>
+</div>
+<a id="method_preferFrom"></a><div class="element clickable method private method_preferFrom" data-toggle="collapse" data-target=".method_preferFrom .collapse">
+<h2>preferFrom()
+        </h2>
+<pre>preferFrom($candidates) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$candidates</h4></div>
+</div></div>
+</div>
+<a id="method_settersFor"></a><div class="element clickable method private method_settersFor" data-toggle="collapse" data-target=".method_settersFor .collapse">
+<h2>settersFor()
+        </h2>
+<pre>settersFor($class) </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description">
+<div class="long_description"></div>
+<h3>Parameters</h3>
+<div class="subelement argument"><h4>$class</h4></div>
+</div></div>
+</div>
+<h3>
+<i class="icon-custom icon-property"></i> Properties</h3>
+<a id="property_contexts"> </a><div class="element clickable property private property_contexts" data-toggle="collapse" data-target=".property_contexts .collapse">
+<h2></h2>
+<pre>$contexts : <a href="Context.html#%5Cphemto%5CContext">\phemto\Context[]</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+<a id="property_parent"> </a><div class="element clickable property private property_parent" data-toggle="collapse" data-target=".property_parent .collapse">
+<h2></h2>
+<pre>$parent : <a href="../classes/phemto.Context.html">\phemto\Context</a> | <a href="../classes/phemto.Phemto.html">\phemto\Phemto</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+<a id="property_registry"> </a><div class="element clickable property private property_registry" data-toggle="collapse" data-target=".property_registry .collapse">
+<h2></h2>
+<pre>$registry </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+<a id="property_types"> </a><div class="element clickable property private property_types" data-toggle="collapse" data-target=".property_types .collapse">
+<h2></h2>
+<pre>$types : <a href="Type.html#%5Cphemto%5CType">\phemto\Type[]</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+<a id="property_variables"> </a><div class="element clickable property private property_variables" data-toggle="collapse" data-target=".property_variables .collapse">
+<h2></h2>
+<pre>$variables : <a href="Variable.html#%5Cphemto%5CVariable">\phemto\Variable[]</a></pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+<a id="property_wrappers"> </a><div class="element clickable property private property_wrappers" data-toggle="collapse" data-target=".property_wrappers .collapse">
+<h2></h2>
+<pre>$wrappers </pre>
+<div class="labels"></div>
+<div class="row collapse"><div class="detail-description"><div class="long_description"></div></div></div>
+</div>
+</div></div>
+</div>
+</div>
+<div class="row"><footer class="span12">
+            Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by <a href="http://glyphicons.com/">Glyphicons</a>.<br>
+            Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor 2.0.0a12</a> and<br>
+            generated on 2013-04-08T15:00:29+10:00.<br></footer></div>
+</div>
+</body>
+</html>
