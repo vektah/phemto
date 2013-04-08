@@ -6,4 +6,8 @@ namespace phemto\exception;
  *
  * @package phemto\exception
  */
-class MissingDependency extends \Exception {}
+class MissingDependency extends \Exception {
+	public function prependMessage($msg){
+		$this->message = $msg . $this->message;
+	}
+}

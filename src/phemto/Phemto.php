@@ -120,7 +120,7 @@ class Phemto
 		if ($parameter->isDefaultValueAvailable()) {
 			return $parameter->getDefaultValue();
 		}
-		throw new MissingDependency($parameter->getName());
+		throw new MissingDependency("Missing dependency '{$parameter->getName()}'");
 	}
 
 	function repository()

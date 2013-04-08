@@ -2,6 +2,7 @@
 namespace phemto;
 
 use phemto\exception\CannotFindImplementation;
+use phemto\exception\MissingDependency;
 use phemto\lifecycle\Factory;
 use phemto\lifecycle\Lifecycle;
 use phemto\lifecycle\Value;
@@ -79,15 +80,20 @@ class Context
 	{
 		$lifecycle = $this->pickFactory($type, $this->repository()->candidatesFor($type));
 		$context = $this->determineContext($lifecycle->class);
-		if ($wrapper = $context->hasWrapper($type, $nesting)) {
-			return $this->create($wrapper, $this->cons($wrapper, $nesting));
+		try {
+			if ($wrapper = $context->hasWrapper($type, $nesting)) {
+				return $this->create($wrapper, $this->cons($wrapper, $nesting));
+			}
+			$instance = $lifecycle->instantiate(
+				$context->createDependencies(
+					$this->repository()->getConstructorParameters($lifecycle->class),
+					$this->cons($lifecycle->class, $nesting)
+				)
+			);
+		} catch (MissingDependency $e) {
+			$e->prependMessage("While creating $type: ");
+			throw $e;
 		}
-		$instance = $lifecycle->instantiate(
-			$context->createDependencies(
-				$this->repository()->getConstructorParameters($lifecycle->class),
-				$this->cons($lifecycle->class, $nesting)
-			)
-		);
 		$this->invokeSetters($context, $nesting, $lifecycle->class, $instance);
 
 		return $instance;
@@ -159,14 +165,7 @@ class Context
 	{
 		$values = array();
 		foreach ($parameters as $parameter) {
-			try {
-				$values[] = $this->instantiateParameter($parameter, $nesting);
-			} catch (Exception $e) {
-				if ($parameter->isOptional()) {
-					break;
-				}
-				throw $e;
-			}
+			$values[] = $this->instantiateParameter($parameter, $nesting);
 		}
 
 		return $values;
@@ -184,16 +183,25 @@ class Context
 			$hint = $parameter->getClass();
 		} catch(\ReflectionException $e) {}
 
-		if ($hint) {
-			return $this->create($hint->getName(), $nesting);
-		} elseif (isset($this->variables[$parameter->getName()])) {
-			if ($this->variables[$parameter->getName()]->preference instanceof Lifecycle) {
-				return $this->variables[$parameter->getName()]->preference->instantiate(array());
-			} elseif (!is_string($this->variables[$parameter->getName()]->preference)) {
-				return $this->variables[$parameter->getName()]->preference;
-			}
+		try {
+			if ($hint) {
+				return $this->create($hint->getName(), $nesting);
+			} elseif (isset($this->variables[$parameter->getName()])) {
+				if ($this->variables[$parameter->getName()]->preference instanceof Lifecycle) {
+					return $this->variables[$parameter->getName()]->preference->instantiate(array());
+				} elseif (!is_string($this->variables[$parameter->getName()]->preference)) {
+					return $this->variables[$parameter->getName()]->preference;
+				}
 
-			return $this->create($this->variables[$parameter->getName()]->preference, $nesting);
+				return $this->create($this->variables[$parameter->getName()]->preference, $nesting);
+			}
+		} catch (MissingDependency $e) {
+			if($parameter->getClass()) {
+				$e->prependMessage("While creating {$parameter->getClass()->getName()}: ");
+			} else {
+				$e->prependMessage("While creating {$parameter->getName()}: ");
+			}
+			throw $e;
 		}
 
 		return $this->parent->instantiateParameter($parameter, $nesting);
