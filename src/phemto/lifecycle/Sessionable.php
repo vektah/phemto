@@ -3,6 +3,7 @@
 namespace phemto\lifecycle;
 
 use ReflectionClass;
+use phemto\Context;
 
 /**
  * Factory cached in session
@@ -19,10 +20,17 @@ class Sessionable extends Lifecycle
 		$this->slot = $slot ? $slot : $class;
 	}
 
-	function instantiate($dependencies)
+	function instantiate(Context $context, $nesting)
 	{
 		@session_start();
 		if (!isset($_SESSION[$this->slot])) {
+			array_unshift($nesting, $this->class);
+
+			$dependencies = $context->createDependencies(
+				$context->repository()->getConstructorParameters($this->class),
+				$nesting
+			);
+
 			$_SESSION[$this->slot] = call_user_func_array(
 				array(new ReflectionClass($this->class), 'newInstance'),
 				$dependencies

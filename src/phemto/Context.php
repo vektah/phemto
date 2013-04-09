@@ -15,6 +15,11 @@ class Context
 	 */
 	private $parent;
 
+	/**
+	 * A map of class name to lifecycle objects.
+	 *
+	 * @var Lifecycle[]
+	 */
 	private $registry = array();
 	/**
 	 * @var Variable[]
@@ -45,7 +50,7 @@ class Context
 		} else {
 			$lifecycle = new Factory($preference);
 		}
-		array_unshift($this->registry, $lifecycle);
+		$this->registry[$lifecycle->class] = $lifecycle;
 	}
 
 	function forVariable($name)
@@ -80,16 +85,13 @@ class Context
 	{
 		$lifecycle = $this->pickFactory($type, $this->repository()->candidatesFor($type));
 		$context = $this->determineContext($lifecycle->class);
+
 		try {
 			if ($wrapper = $context->hasWrapper($type, $nesting)) {
-				return $this->create($wrapper, $this->cons($wrapper, $nesting));
+				array_unshift($nesting, $wrapper);
+				return $this->create($wrapper, $nesting);
 			}
-			$instance = $lifecycle->instantiate(
-				$context->createDependencies(
-					$this->repository()->getConstructorParameters($lifecycle->class),
-					$this->cons($lifecycle->class, $nesting)
-				)
-			);
+			$instance = $lifecycle->instantiate($context, $nesting);
 		} catch (MissingDependency $e) {
 			$e->prependMessage("While creating $type: ");
 			throw $e;
@@ -99,6 +101,15 @@ class Context
 		return $instance;
 	}
 
+	/**
+	 * Pick a lifecycle for the given type from the available candidates.
+	 *
+	 * @param string   $type          type
+	 * @param string[] $candidates    list of types that can satisfy this type
+	 * @return Lifecycle              A lifecycle object for this type
+	 *
+	 * @throws exception\CannotFindImplementation
+	 */
 	function pickFactory($type, $candidates)
 	{
 		if (count($candidates) == 0) {
@@ -126,12 +137,14 @@ class Context
 	private function invokeSetters($context, $nesting, $class, $instance)
 	{
 		foreach ($context->settersFor($class) as $setter) {
+			array_unshift($nesting, $class);
+
 			$context->invoke(
 				$instance,
 				$setter,
 				$context->createDependencies(
 					$this->repository()->getParameters($class, $setter),
-					$this->cons($class, $nesting)
+					$nesting
 				)
 			);
 		}
@@ -188,7 +201,7 @@ class Context
 				return $this->create($hint->getName(), $nesting);
 			} elseif (isset($this->variables[$parameter->getName()])) {
 				if ($this->variables[$parameter->getName()]->preference instanceof Lifecycle) {
-					return $this->variables[$parameter->getName()]->preference->instantiate(array());
+					return $this->variables[$parameter->getName()]->preference->instantiate($this, $nesting);
 				} elseif (!is_string($this->variables[$parameter->getName()]->preference)) {
 					return $this->variables[$parameter->getName()]->preference;
 				}
@@ -223,22 +236,21 @@ class Context
 		call_user_func_array(array($instance, $method), $arguments);
 	}
 
+	/**
+	 * Picks the best candidate from a list.
+	 *
+	 * @param string[]  $candidates  A list of possible candidates
+	 * @return null
+	 */
 	private function preferFrom($candidates)
 	{
-		foreach ($this->registry as $preference) {
-			if ($preference->isOneOf($candidates)) {
-				return $preference;
+		foreach($candidates as $candidate) {
+			if(isset($this->registry[$candidate])) {
+				return $this->registry[$candidate];
 			}
 		}
 
 		return false;
-	}
-
-	private function cons($head, $tail)
-	{
-		array_unshift($tail, $head);
-
-		return $tail;
 	}
 
 	/**

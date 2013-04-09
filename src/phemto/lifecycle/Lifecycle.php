@@ -1,6 +1,7 @@
 <?php
 namespace phemto\lifecycle;
 
+use phemto\Context;
 use phemto\exception\CannotFindImplementation;
 
 /**
@@ -25,10 +26,5 @@ abstract class Lifecycle
 		}
 	}
 
-	function isOneOf($candidates)
-	{
-		return in_array($this->class, $candidates);
-	}
-
-	abstract function instantiate($dependencies);
+	abstract function instantiate(Context $context, $nesting);
 }

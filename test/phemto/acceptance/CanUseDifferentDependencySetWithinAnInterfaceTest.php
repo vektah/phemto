@@ -46,8 +46,9 @@ class CanUseDifferentDependencySetWithinAnInterfaceTest extends \PHPUnit_Framewo
 		$injector = new Phemto();
 		$injector->whenCreating('phemto\acceptance\SpecialInterface')->willUse('phemto\acceptance\SpecialImplementation');
 		$injector->willUse('phemto\acceptance\UsualImplementation');
+		$special = $injector->create('phemto\acceptance\SpecialInterface');
 		$this->assertEquals(
-			$injector->create('phemto\acceptance\SpecialInterface'),
+			$special,
 			new ClassWithSpecial(new SpecialImplementation())
 		);
 	}

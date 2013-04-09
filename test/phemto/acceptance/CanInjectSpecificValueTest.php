@@ -41,6 +41,37 @@ class CanInjectSpecificValueTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
+	public function testInjectGlobalDependency()
+	{
+		$injector = new Phemto();
+
+		$statically = new Thing();
+
+		$injector->willUse($statically);
+
+		$thing = $injector->create('phemto\acceptance\WrapThing');
+
+		$this->assertSame(
+			$statically,
+			$thing->thing
+		);
+	}
+
+	public function testPreInjectedDependency()
+	{
+		$injector = new Phemto();
+
+		$wrap = new WrapAnything(new Thing());
+
+		$injector->willUse($wrap);
+
+		$anything = $injector->create('phemto\acceptance\WrapAnything');
+		$this->assertEquals(
+			$wrap,
+			$anything
+		);
+	}
+
 	function testInjectingSpecificInstanceForNamedVariable()
 	{
 		$injector = new Phemto();

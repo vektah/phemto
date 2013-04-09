@@ -1,6 +1,8 @@
 <?php
 namespace phemto\lifecycle;
 
+use phemto\Context;
+
 /**
  * Always returns a set value.
  *
@@ -18,7 +20,7 @@ class Value extends Lifecycle
 		}
 	}
 
-	function instantiate($dependencies)
+	function instantiate(Context $context, $nesting)
 	{
 		return $this->instance;
 	}
