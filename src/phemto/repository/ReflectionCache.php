@@ -62,6 +62,10 @@ class ReflectionCache
 		return $this->parents[$class];
 	}
 
+	/**
+	 * @param $class
+	 * @return \ReflectionClass
+	 */
 	function reflection($class)
 	{
 		if (!isset($this->reflections[$class])) {

@@ -1,6 +1,8 @@
 <?php
 namespace phemto\repository;
 
+use phemto\exception\SetterDoesNotExist;
+
 /**
  * The actual DI container
  *
@@ -50,6 +52,14 @@ class ClassRepository
 		return array();
 	}
 
+	/**
+	 * Gets a list of reflection paramaters for the given class+method
+	 *
+	 * @param string $class        The name of the class
+	 * @param string $method       The name of the method
+	 * @return \ReflectionParameter[] a list of paramaters
+	 * @throws SetterDoesNotExist
+	 */
 	function getParameters($class, $method)
 	{
 		$reflection = static::$reflection->reflection($class);

@@ -83,6 +83,19 @@ class Phemto
 		return $object;
 	}
 
+	/**
+	 * Call a method called $method on the object instance $instance.
+	 *
+	 * @param object $instance
+	 * @param string $method
+	 *
+	 * @return mixed the result from the call.
+	 */
+	public function call($instance, $method)
+	{
+		return $this->top->call($instance, $method);
+	}
+
 	function pickFactory($type, $candidates)
 	{
 		throw new CannotDetermineImplementation($type);

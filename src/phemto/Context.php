@@ -134,7 +134,7 @@ class Context
 		return false;
 	}
 
-	private function invokeSetters($context, $nesting, $class, $instance)
+	private function invokeSetters(Context $context, $nesting, $class, $instance)
 	{
 		foreach ($context->settersFor($class) as $setter) {
 			array_unshift($nesting, $class);
@@ -170,6 +170,26 @@ class Context
 			array_merge(
 				$this->wrappers,
 				$this->parent->wrappersFor($type)
+			)
+		);
+	}
+
+	/**
+	 * Call a method of an instance, automatically injecting parameters from the container.
+	 *
+	 * @param object  $instance         The class containing the method
+	 * @param string  $method           The method name
+	 * @param array $nesting            An array containing any nested dependencies.
+	 * @return mixed The result of the call
+	 */
+	public function call($instance, $method, $nesting = [])
+	{
+		return $this->invoke(
+			$instance,
+			$method,
+			$this->createDependencies(
+				$this->repository()->getParameters(get_class($instance), $method),
+				$nesting
 			)
 		);
 	}
@@ -233,7 +253,7 @@ class Context
 
 	private function invoke($instance, $method, $arguments)
 	{
-		call_user_func_array(array($instance, $method), $arguments);
+		return call_user_func_array(array($instance, $method), $arguments);
 	}
 
 	/**
